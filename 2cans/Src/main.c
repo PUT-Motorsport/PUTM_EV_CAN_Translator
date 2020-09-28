@@ -41,9 +41,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef hcan1;
+CAN_HandleTypeDef hcan2;
 
 /* USER CODE BEGIN PV */
-CAN_FilterTypeDef sFilterConfig;
+CAN_FilterTypeDef sFilterConfig, sFilterConfig2;
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 uint8_t TxData[8];
@@ -55,6 +56,7 @@ uint32_t TxMailbox;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CAN1_Init(void);
+static void MX_CAN2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -93,6 +95,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CAN1_Init();
+  MX_CAN2_Init();
   /* USER CODE BEGIN 2 */
   sFilterConfig.FilterBank = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -105,11 +108,28 @@ int main(void)
   sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.SlaveStartFilterBank = 14;
 
+  sFilterConfig2.FilterBank = 15;
+    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig2.FilterIdHigh = 0x0000;
+    sFilterConfig2.FilterIdLow = 0x0000;
+    sFilterConfig2.FilterMaskIdHigh = 0x0000;
+    sFilterConfig2.FilterMaskIdLow = 0x0000;
+    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig2.FilterActivation = ENABLE;
+    sFilterConfig2.SlaveStartFilterBank = 14;
+
   if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
   {
   /* Filter configuration Error */
 	  Error_Handler();
   }
+
+  if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK)
+    {
+    /* Filter configuration Error */
+  	  Error_Handler();
+    }
 
   if (HAL_CAN_Start(&hcan1) != HAL_OK)
   {
@@ -117,11 +137,38 @@ int main(void)
   Error_Handler();
   }
 
+  if (HAL_CAN_Start(&hcan2) != HAL_OK)
+    {
+    /* Start Error */
+    Error_Handler();
+    }
+
   if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
   {
   /* Notification Error */
   Error_Handler();
   }
+
+  if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
+    {
+    /* Notification Error */
+    Error_Handler();
+    }
+
+  TxHeader.StdId = 0x321;
+  	TxHeader.ExtId = 0x00;
+  	TxHeader.RTR = CAN_RTR_DATA;
+  	TxHeader.IDE = CAN_ID_STD;
+  	TxHeader.DLC = 8;
+  	TxHeader.TransmitGlobalTime = DISABLE;
+  	TxData[0] = 0x72;
+  	TxData[1] = 0x75;
+  	TxData[2] = 0x63;
+  	TxData[3] = 0x68;
+  	TxData[4] = 0x61;
+  	TxData[5] = 0x6e;
+  	TxData[6] = 0x69;
+  	TxData[7] = 0x65;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,6 +178,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	  if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) == HAL_OK){
+//	  			 //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//
+//	  		 }
+//	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -194,11 +246,11 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 8;
+  hcan1.Init.Prescaler = 2;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_13TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_14TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
@@ -212,6 +264,43 @@ static void MX_CAN1_Init(void)
   /* USER CODE BEGIN CAN1_Init 2 */
 
   /* USER CODE END CAN1_Init 2 */
+
+}
+
+/**
+  * @brief CAN2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CAN2_Init(void)
+{
+
+  /* USER CODE BEGIN CAN2_Init 0 */
+
+  /* USER CODE END CAN2_Init 0 */
+
+  /* USER CODE BEGIN CAN2_Init 1 */
+
+  /* USER CODE END CAN2_Init 1 */
+  hcan2.Instance = CAN2;
+  hcan2.Init.Prescaler = 2;
+  hcan2.Init.Mode = CAN_MODE_NORMAL;
+  hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan2.Init.TimeSeg1 = CAN_BS1_14TQ;
+  hcan2.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan2.Init.TimeTriggeredMode = DISABLE;
+  hcan2.Init.AutoBusOff = DISABLE;
+  hcan2.Init.AutoWakeUp = DISABLE;
+  hcan2.Init.AutoRetransmission = DISABLE;
+  hcan2.Init.ReceiveFifoLocked = DISABLE;
+  hcan2.Init.TransmitFifoPriority = DISABLE;
+  if (HAL_CAN_Init(&hcan2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CAN2_Init 2 */
+
+  /* USER CODE END CAN2_Init 2 */
 
 }
 
