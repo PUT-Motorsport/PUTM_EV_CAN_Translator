@@ -59,13 +59,11 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 /* USER CODE BEGIN EV */
-CAN_FilterTypeDef sFilterConfig;
-extern CAN_TxHeaderTypeDef TxHeader;
-extern CAN_RxHeaderTypeDef RxHeader;
-extern uint8_t TxData[8];
-extern uint8_t RxData[8];
-extern uint32_t TxMailbox;
 
+CAN_RxHeaderTypeDef RxHeader;
+uint8_t RxData[8];
+uint32_t TxMailbox;
+int i=0;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -210,20 +208,15 @@ void SysTick_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
-	TxHeader.StdId = 0x321;
-	TxHeader.ExtId = 0x00;
-	TxHeader.RTR = CAN_RTR_DATA;
-	TxHeader.IDE = CAN_ID_STD;
-	TxHeader.DLC = 8;
-	TxHeader.TransmitGlobalTime = DISABLE;
-	TxData[0] = 1;
-	TxData[1] = 2;
-	TxData[2] = 3;
-	TxData[3] = 4;
-	TxData[4] = 5;
-	TxData[5] = 6;
-	TxData[6] = 7;
-	TxData[7] = 8;
+	CAN_TxHeaderTypeDef TxHeader;
+	uint8_t* TxData = NULL;
+
+	if(i%2==0){
+		CAN_set_speed_command(&TxHeader, &TxData, 0);
+	}else{
+		CAN_dummy_command(&TxHeader, &TxData);
+	}
+	i++;
 
 	 for (int n=0;n<1000000;n++); //this loop is used to make a software delay, remove optimization for this to work
 	 if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)) //check to ensure pin is pressed
@@ -232,6 +225,8 @@ void EXTI0_IRQHandler(void)
 			 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 		 }
 	 }
+
+	 free(TxData);
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */

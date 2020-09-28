@@ -45,11 +45,7 @@ CAN_HandleTypeDef hcan2;
 
 /* USER CODE BEGIN PV */
 CAN_FilterTypeDef sFilterConfig, sFilterConfig2;
-CAN_TxHeaderTypeDef TxHeader;
-CAN_RxHeaderTypeDef RxHeader;
-uint8_t TxData[8];
-uint8_t RxData[8];
-uint32_t TxMailbox;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -155,20 +151,7 @@ int main(void)
     Error_Handler();
     }
 
-  TxHeader.StdId = 0x321;
-  	TxHeader.ExtId = 0x00;
-  	TxHeader.RTR = CAN_RTR_DATA;
-  	TxHeader.IDE = CAN_ID_STD;
-  	TxHeader.DLC = 8;
-  	TxHeader.TransmitGlobalTime = DISABLE;
-  	TxData[0] = 0x72;
-  	TxData[1] = 0x75;
-  	TxData[2] = 0x63;
-  	TxData[3] = 0x68;
-  	TxData[4] = 0x61;
-  	TxData[5] = 0x6e;
-  	TxData[6] = 0x69;
-  	TxData[7] = 0x65;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
