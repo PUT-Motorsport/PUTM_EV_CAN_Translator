@@ -2,7 +2,7 @@
 
 void CAN_dummy_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	TxHeader->StdId = 0x321;
-	TxHeader->ExtId = 0x00;
+//	TxHeader->ExtId = 0x00;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 8;
@@ -22,7 +22,7 @@ void CAN_dummy_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 
 void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, int16_t value){
 	TxHeader->StdId = 0x201;
-	TxHeader->ExtId = 0x00;
+//	TxHeader->ExtId = 0x00;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -42,7 +42,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, int1
 
 void CAN_ask_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	TxHeader->StdId = 0x201;
-	TxHeader->ExtId = 0x00;
+//	TxHeader->ExtId = 0x00;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;

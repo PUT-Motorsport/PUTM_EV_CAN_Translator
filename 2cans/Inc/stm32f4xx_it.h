@@ -28,7 +28,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdlib.h>
+#include "can_messeges_func.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

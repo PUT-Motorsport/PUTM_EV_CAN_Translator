@@ -109,8 +109,8 @@ int main(void)
     sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
     sFilterConfig2.FilterIdHigh = 0x0000;
     sFilterConfig2.FilterIdLow = 0x0000;
-    sFilterConfig2.FilterMaskIdHigh = 0x0000;
-    sFilterConfig2.FilterMaskIdLow = 0x0000;
+    sFilterConfig2.FilterMaskIdHigh = 0x0;
+    sFilterConfig2.FilterMaskIdLow = 0x0;
     sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
     sFilterConfig2.FilterActivation = ENABLE;
     sFilterConfig2.SlaveStartFilterBank = 14;
