@@ -60,10 +60,10 @@ extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 /* USER CODE BEGIN EV */
 
-CAN_RxHeaderTypeDef RxHeader;
-uint8_t RxData[8];
-uint32_t TxMailbox1, TxMailbox2;
-int i=0;
+extern CAN_RxHeaderTypeDef RxHeader;
+extern uint8_t RxData[8];
+extern uint32_t TxMailbox1, TxMailbox2;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -219,7 +219,7 @@ void EXTI0_IRQHandler(void)
 
 	 if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)) //check to ensure pin is pressed
 	 {
-		 if(HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) == HAL_OK){
+		 if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox1) == HAL_OK){
 			 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 		 }
 		 else{
@@ -271,7 +271,7 @@ void CAN2_RX0_IRQHandler(void)
   	  }else if(RxHeader.StdId == 0x190){
   		  if(RxData[0] == 0x30){
   			  // RxData[1]-RxData[3] Value of the speed command value 100% (num 32767)
-  			  printf(RxData[1]);
+  			  ;//printf(RxData[1]);
   		  }
 
   	  }

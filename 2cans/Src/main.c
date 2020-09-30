@@ -45,7 +45,9 @@ CAN_HandleTypeDef hcan2;
 
 /* USER CODE BEGIN PV */
 CAN_FilterTypeDef sFilterConfig, sFilterConfig2;
-
+CAN_RxHeaderTypeDef RxHeader;
+uint8_t RxData[8];
+uint32_t TxMailbox1, TxMailbox2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -151,6 +153,34 @@ int main(void)
     Error_Handler();
     }
 
+  //speeeed
+
+  for(uint16_t i = 1; i <= 20 ; i++ ){
+	  CAN_TxHeaderTypeDef TxHeader;
+	  uint8_t* TxData = NULL;
+
+	  if(i<20){
+		  CAN_set_speed_command(&TxHeader, &TxData, i);
+	  }
+	  else{
+		  CAN_stop_speed_command(&TxHeader, &TxData);
+	  }
+
+
+	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+	        {
+	        /* Notification Error */
+	        Error_Handler();
+	        }
+
+	  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+  	  HAL_Delay(1000);
+  	  free(TxData);
+    }
+
+
+
+
 
   /* USER CODE END 2 */
 
@@ -161,11 +191,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) == HAL_OK){
-//	  			 //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//
-//	  		 }
-//	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -229,7 +254,7 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 2;
+  hcan1.Init.Prescaler = 4;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_14TQ;
@@ -266,7 +291,7 @@ static void MX_CAN2_Init(void)
 
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 2;
+  hcan2.Init.Prescaler = 4;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_14TQ;
