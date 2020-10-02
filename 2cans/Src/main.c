@@ -49,7 +49,7 @@ CAN_RxHeaderTypeDef RxHeader;
 uint8_t RxData[8];
 uint32_t TxMailbox1, TxMailbox2;
 uint16_t engine_mode;
-
+typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,7 +58,7 @@ static void MX_GPIO_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void CAN_requests_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -158,15 +158,15 @@ int main(void)
 	  Error_Handler();
   }
 
-  //speeeed
+  CAN_requests_Init();
 
-  for(uint16_t i = 1; i <= 21 ; i++ ){
+
+//speeeed
+  for(uint16_t i = 1; i <= 61 ; i+=3 ){
 	  CAN_TxHeaderTypeDef TxHeader;
 	  uint8_t* TxData = NULL;
 
-	  if(i<20){
-		  CAN_set_speed_command(&TxHeader, &TxData, i);
-	  }
+	  CAN_set_speed_command(&TxHeader, &TxData, i);
 
 
 	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
@@ -175,7 +175,7 @@ int main(void)
 	  }
 
 	  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-  	  HAL_Delay(1000);
+  	  HAL_Delay(2000);
   	  free(TxData);
     }
 
@@ -349,7 +349,32 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void CAN_requests_Init(void){
+	request_list_type requests[5] = {
+			&CAN_request_speed_command,
+			&CAN_request_power_command,
+			&CAN_request_igbt_temp_command,
+			&CAN_request_motor_temp_command,
+			&CAN_request_air_temp_command
+	};
 
+	for (int i = 0; i < 5; ++i){
+		CAN_TxHeaderTypeDef TxHeader;
+	    uint8_t* TxData = NULL;
+
+	    requests[i](&TxHeader, &TxData);
+
+	    if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+	    {
+		  Error_Handler();
+	    }
+
+	    while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+	    free(TxData);
+	}
+
+
+}
 /* USER CODE END 4 */
 
 /**

@@ -228,51 +228,6 @@ void CAN1_RX0_IRQHandler(void)
 
   /* USER CODE END CAN1_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan1);
-  HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData);
-
-  if (status == HAL_OK){
-	  if (RxHeader.StdId == 0x0A){
-		  CAN_TxHeaderTypeDef TxHeader;
-		  uint8_t* TxData = NULL;
-		  uint16_t apps = ((uint16_t)RxData[1]) << 8;
-		  apps = apps | ((uint16_t)RxData[0]);
-
-		  //send to inverter speeeeeed
-		  CAN_set_speed_command(&TxHeader, &TxData, apps);
-		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-		  {
-			  Error_Handler();
-		  }
-		  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-		  free(TxData);
-	  }
-	  else if (RxHeader.StdId == 0x0B){
-		  if (RxData[1] == 0xFF){
-			  CAN_TxHeaderTypeDef TxHeader;
-			  uint8_t* TxData = NULL;
-			  CAN_stop_speed_command(&TxHeader, &TxData);
-
-			  //send to inverter stop/block
-			  //CAN_set_speed_command(&TxHeader, &TxData, apps);
-			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-			  {
-				  Error_Handler();
-			  }
-			  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-			  free(TxData);
-		  }
-	  }
-	  else if (RxHeader.StdId == 0x0F){
-		  uint16_t engine_mode_new = ((uint16_t)RxData[1]) << 8;
-		  engine_mode_new = engine_mode_new | ((uint16_t)RxData[0]);
-		  engine_mode = engine_mode_new;
-		  // change engine mode
-	  }
-  }
-  else{
-	  Error_Handler();
-  }
-
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
 
   /* USER CODE END CAN1_RX0_IRQn 1 */
@@ -289,8 +244,25 @@ void CAN2_RX0_IRQHandler(void)
   HAL_CAN_IRQHandler(&hcan2);
   /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
   if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-  	  ;
+  	  if(RxHeader.StdId == 0x181){
+  		  uint8_t regid = RxData[0];
 
+  		  if(regid == 0x5e){ //CAN_request_speed_command
+  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+  		  }
+  		  else if(regid == 0x5f){ //CAN_request_power_command
+  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+  		  }
+  		  else if(regid == 0x4A){ //CAN_request_igbt_temp_command
+  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+  		  }
+  		  else if(regid == 0x49){ //CAN_request_motor_temp_command
+  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+  		  }
+  		  else if(regid == 0x4B){ //CAN_request_air_temp_command
+  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+  		  }
+  	  }
     }else{
     	Error_Handler();
     }

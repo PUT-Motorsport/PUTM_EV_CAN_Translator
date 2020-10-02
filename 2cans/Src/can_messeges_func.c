@@ -27,9 +27,9 @@ void CAN_dummy_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 
 void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint16_t apps){
 	/*
-		 * apps 1 => 0.5% speed
-		 * apps 2 => 1.0% speed
-		 * apps 3 => 1.5% speed
+		 * apps 1 => 0.2% speed
+		 * apps 2 => 0.4% speed
+		 * apps 3 => 0.6% speed
 		 *
 		 */
 
@@ -45,7 +45,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 	//REGID for the speed command value (SPEED_SOLL)
 	(*TxData)[0] = 0x31;
 
-	uint16_t val = (MAX_SPEED / 200) * apps;
+	uint16_t val = (MAX_SPEED / 500) * apps;
 //	uint16_t val =
 
 	//Value Range for 10% speed num.
@@ -65,15 +65,12 @@ void CAN_stop_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	(*TxData) = malloc(3 * sizeof(uint8_t));
 
 	(*TxData)[0] = 0x31; //REGID for the speed command value (SPEED_SOLL)
-
-	//Value Range for 10% speed num.
-	//Head 3277 == 0x0CCD
 	(*TxData)[1] = 0x00;
 	(*TxData)[2] = 0x00;
 
 }
 
-void CAN_ask_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+void CAN_request_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	TxHeader->StdId = 0x201;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
@@ -83,6 +80,62 @@ void CAN_ask_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	(*TxData) = malloc(3 * sizeof(uint8_t));
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
-	(*TxData)[1] = 0x30; //REGID for actual speed value (SPEED_IST)
-	(*TxData)[2] = 0x64; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[1] = 0x5e; //(SPEED_FILTER_) Filter speed actual value
+	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+}
+
+void CAN_request_power_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	TxHeader->StdId = 0x201;
+	TxHeader->RTR = CAN_RTR_DATA;
+	TxHeader->IDE = CAN_ID_STD;
+	TxHeader->DLC = 3;
+	TxHeader->TransmitGlobalTime = DISABLE;
+
+	(*TxData) = malloc(3 * sizeof(uint8_t));
+
+	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
+	(*TxData)[1] = 0x5f; //(I_IST_FILT) Filtered actual current
+	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+}
+
+void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	TxHeader->StdId = 0x201;
+	TxHeader->RTR = CAN_RTR_DATA;
+	TxHeader->IDE = CAN_ID_STD;
+	TxHeader->DLC = 3;
+	TxHeader->TransmitGlobalTime = DISABLE;
+
+	(*TxData) = malloc(3 * sizeof(uint8_t));
+
+	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
+	(*TxData)[1] = 0x4A; //(T_IGBT) power stage temperature
+	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+}
+
+void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	TxHeader->StdId = 0x201;
+	TxHeader->RTR = CAN_RTR_DATA;
+	TxHeader->IDE = CAN_ID_STD;
+	TxHeader->DLC = 3;
+	TxHeader->TransmitGlobalTime = DISABLE;
+
+	(*TxData) = malloc(3 * sizeof(uint8_t));
+
+	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
+	(*TxData)[1] = 0x49; //(T_MOTOR) motor temperature
+	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+}
+
+void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	TxHeader->StdId = 0x201;
+	TxHeader->RTR = CAN_RTR_DATA;
+	TxHeader->IDE = CAN_ID_STD;
+	TxHeader->DLC = 3;
+	TxHeader->TransmitGlobalTime = DISABLE;
+
+	(*TxData) = malloc(3 * sizeof(uint8_t));
+
+	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
+	(*TxData)[1] = 0x4B; //(T_AIR) air temperature
+	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
 }
