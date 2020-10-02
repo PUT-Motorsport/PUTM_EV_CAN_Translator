@@ -62,9 +62,15 @@ extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 /* USER CODE BEGIN EV */
 
-extern CAN_RxHeaderTypeDef RxHeader;
-extern uint8_t RxData[8];
-extern uint32_t TxMailbox1, TxMailbox2;
+extern CAN_RxHeaderTypeDef RxHeader_CAN1;
+extern CAN_RxHeaderTypeDef RxHeader_CAN2;
+
+extern uint8_t RxData_CAN1[8];
+extern uint8_t RxData_CAN2[8];
+
+extern uint32_t TxMailbox1;
+extern uint32_t TxMailbox2;
+
 extern uint16_t engine_mode;
 
 /* USER CODE END EV */
@@ -229,7 +235,42 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE END CAN1_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan1);
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
+  if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK){
+	  if(RxHeader_CAN1.StdId == 0x0A){
+		  CAN_TxHeaderTypeDef TxHeader;
+		  uint8_t* TxData = NULL;
 
+		  uint16_t apps = ((uint16_t)RxData_CAN1[1]) << 8;
+		  apps = apps | ((uint16_t)RxData_CAN1[0]);
+
+
+		  CAN_set_speed_command(&TxHeader, &TxData, apps);
+
+		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+		  {
+		    Error_Handler();
+		  }
+		  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+		  free(TxData);
+	  }
+	  else if(RxHeader_CAN1.StdId == 0x0C){
+		  if(RxData_CAN1[3] == 0x66){
+			  CAN_TxHeaderTypeDef TxHeader;
+			  uint8_t* TxData = NULL;
+
+			  CAN_disable_controller_command(&TxHeader, &TxData);
+
+			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+			  {
+				Error_Handler();
+			  }
+			  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+			  free(TxData);
+		  }
+	  }
+  }else{
+	Error_Handler();
+  }
   /* USER CODE END CAN1_RX0_IRQn 1 */
 }
 
@@ -243,9 +284,9 @@ void CAN2_RX0_IRQHandler(void)
   /* USER CODE END CAN2_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan2);
   /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
-  if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-  	  if(RxHeader.StdId == 0x181){
-  		  uint8_t regid = RxData[0];
+  if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader_CAN2, RxData_CAN2) == HAL_OK){
+  	  if(RxHeader_CAN2.StdId == 0x181){
+  		  uint8_t regid = RxData_CAN2[0];
 
   		  if(regid == 0x5e){ //CAN_request_speed_command
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);

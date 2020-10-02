@@ -44,12 +44,21 @@ CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
 
 /* USER CODE BEGIN PV */
-CAN_FilterTypeDef sFilterConfig, sFilterConfig2;
-CAN_RxHeaderTypeDef RxHeader;
-uint8_t RxData[8];
-uint32_t TxMailbox1, TxMailbox2;
+CAN_FilterTypeDef sFilterConfig;
+CAN_FilterTypeDef sFilterConfig2;
+
+CAN_RxHeaderTypeDef RxHeader_CAN1;
+CAN_RxHeaderTypeDef RxHeader_CAN2;
+
+uint8_t RxData_CAN1[8];
+uint8_t RxData_CAN2[8];
+
+uint32_t TxMailbox1;
+uint32_t TxMailbox2;
+
 uint16_t engine_mode;
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -162,22 +171,22 @@ int main(void)
 
 
 //speeeed
-  for(uint16_t i = 1; i <= 61 ; i+=3 ){
-	  CAN_TxHeaderTypeDef TxHeader;
-	  uint8_t* TxData = NULL;
-
-	  CAN_set_speed_command(&TxHeader, &TxData, i);
-
-
-	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-	  {
-		  Error_Handler();
-	  }
-
-	  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-  	  HAL_Delay(2000);
-  	  free(TxData);
-    }
+//  for(uint16_t i = 1; i <= 61 ; i+=3 ){
+//	  CAN_TxHeaderTypeDef TxHeader;
+//	  uint8_t* TxData = NULL;
+//
+//	  CAN_set_speed_command(&TxHeader, &TxData, i);
+//
+//
+//	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+//	  {
+//		  Error_Handler();
+//	  }
+//
+//	  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+//  	  HAL_Delay(2000);
+//  	  free(TxData);
+//    }
 
 
 
@@ -375,6 +384,8 @@ static void CAN_requests_Init(void){
 
 
 }
+
+
 /* USER CODE END 4 */
 
 /**

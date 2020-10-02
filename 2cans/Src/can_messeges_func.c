@@ -6,23 +6,18 @@ uint16_t MAX_SPEED = 32767;
 extern uint16_t engine_mode;
 
 
-void CAN_dummy_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x321;
+void CAN_disable_controller_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	TxHeader->StdId = 0x201;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
-	TxHeader->DLC = 8;
+	TxHeader->DLC = 3;
 	TxHeader->TransmitGlobalTime = DISABLE;
 
-	(*TxData) = malloc(8 * sizeof(uint8_t));
+	(*TxData) = malloc(3 * sizeof(uint8_t));
 
-	(*TxData)[0] = 1;
-	(*TxData)[1] = 2;
-	(*TxData)[2] = 3;
-	(*TxData)[3] = 4;
-	(*TxData)[4] = 5;
-	(*TxData)[5] = 6;
-	(*TxData)[6] = 7;
-	(*TxData)[7] = 8;
+	(*TxData)[0] = 0x51;
+	(*TxData)[1] = 0x04;
+	(*TxData)[2] = 0x00;
 }
 
 void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint16_t apps){
@@ -42,14 +37,9 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 
 	(*TxData) = malloc(3 * sizeof(uint8_t));
 
-	//REGID for the speed command value (SPEED_SOLL)
-	(*TxData)[0] = 0x31;
+	(*TxData)[0] = 0x31; //REGID for the speed command value (SPEED_SOLL)
 
 	uint16_t val = (MAX_SPEED / 500) * apps;
-//	uint16_t val =
-
-	//Value Range for 10% speed num.
-	//Head 3277 == 0x0CCD
 	(*TxData)[1] = (uint8_t)(val & 0x00FF);
 	(*TxData)[2] = (uint8_t)(val >> 8);
 
