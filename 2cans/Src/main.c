@@ -167,10 +167,6 @@ int main(void)
 	  if(i<20){
 		  CAN_set_speed_command(&TxHeader, &TxData, i);
 	  }
-	  else{
-		  //CAN_stop_speed_command(&TxHeader, &TxData);
-		  ;
-	  }
 
 
 	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)

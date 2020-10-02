@@ -211,27 +211,7 @@ void SysTick_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
-	for (int n=0;n<1000000;n++); //this loop is used to make a software delay, remove optimization for this to work
 
-
-	CAN_TxHeaderTypeDef TxHeader;
-	uint8_t* TxData = NULL;
-
-	CAN_ask_speed_command(&TxHeader, &TxData);
-
-
-	 if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)) //check to ensure pin is pressed
-	 {
-		 if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox1) == HAL_OK){
-			 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-		 }
-		 else{
-			 Error_Handler();
-		 }
-	 }
-
-
-	 free(TxData);
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
@@ -294,11 +274,6 @@ void CAN1_RX0_IRQHandler(void)
   }
 
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
-//  if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-//  }else{
-//	  Error_Handler();
-//  }
 
   /* USER CODE END CAN1_RX0_IRQn 1 */
 }
@@ -314,15 +289,7 @@ void CAN2_RX0_IRQHandler(void)
   HAL_CAN_IRQHandler(&hcan2);
   /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
   if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-  	  if(RxHeader.StdId == 0x201){
-  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-  	  }else if(RxHeader.StdId == 0x190){
-  		  if(RxData[0] == 0x30){
-  			  // RxData[1]-RxData[3] Value of the speed command value 100% (num 32767)
-  			  ;//printf(RxData[1]);
-  		  }
-
-  	  }
+  	  ;
 
     }else{
     	Error_Handler();
