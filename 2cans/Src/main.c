@@ -48,6 +48,8 @@ CAN_FilterTypeDef sFilterConfig, sFilterConfig2;
 CAN_RxHeaderTypeDef RxHeader;
 uint8_t RxData[8];
 uint32_t TxMailbox1, TxMailbox2;
+uint16_t engine_mode;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,6 +97,9 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   /* USER CODE BEGIN 2 */
+
+  engine_mode = 100;
+
   sFilterConfig.FilterBank = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
@@ -107,15 +112,15 @@ int main(void)
   sFilterConfig.SlaveStartFilterBank = 14;
 
   sFilterConfig2.FilterBank = 15;
-    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig2.FilterIdHigh = 0x0000;
-    sFilterConfig2.FilterIdLow = 0x0000;
-    sFilterConfig2.FilterMaskIdHigh = 0x0;
-    sFilterConfig2.FilterMaskIdLow = 0x0;
-    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig2.FilterActivation = ENABLE;
-    sFilterConfig2.SlaveStartFilterBank = 14;
+  sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig2.FilterIdHigh = 0x0000;
+  sFilterConfig2.FilterIdLow = 0x0000;
+  sFilterConfig2.FilterMaskIdHigh = 0x0;
+  sFilterConfig2.FilterMaskIdLow = 0x0;
+  sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig2.FilterActivation = ENABLE;
+  sFilterConfig2.SlaveStartFilterBank = 14;
 
   if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
   {
@@ -124,38 +129,38 @@ int main(void)
   }
 
   if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK)
-    {
+  {
     /* Filter configuration Error */
-  	  Error_Handler();
-    }
+	  Error_Handler();
+  }
 
   if (HAL_CAN_Start(&hcan1) != HAL_OK)
   {
   /* Start Error */
-  Error_Handler();
+	  Error_Handler();
   }
 
   if (HAL_CAN_Start(&hcan2) != HAL_OK)
-    {
+  {
     /* Start Error */
-    Error_Handler();
-    }
+	  Error_Handler();
+  }
 
   if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
   {
   /* Notification Error */
-  Error_Handler();
+	  Error_Handler();
   }
 
   if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
-    {
+  {
     /* Notification Error */
-    Error_Handler();
-    }
+	  Error_Handler();
+  }
 
   //speeeed
 
-  for(uint16_t i = 1; i <= 20 ; i++ ){
+  for(uint16_t i = 1; i <= 21 ; i++ ){
 	  CAN_TxHeaderTypeDef TxHeader;
 	  uint8_t* TxData = NULL;
 
@@ -163,22 +168,20 @@ int main(void)
 		  CAN_set_speed_command(&TxHeader, &TxData, i);
 	  }
 	  else{
-		  CAN_stop_speed_command(&TxHeader, &TxData);
+		  //CAN_stop_speed_command(&TxHeader, &TxData);
+		  ;
 	  }
 
 
 	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-	        {
-	        /* Notification Error */
-	        Error_Handler();
-	        }
+	  {
+		  Error_Handler();
+	  }
 
 	  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
   	  HAL_Delay(1000);
   	  free(TxData);
     }
-
-
 
 
 

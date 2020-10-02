@@ -23,6 +23,8 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "can_messeges_func.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,6 +65,7 @@ extern CAN_HandleTypeDef hcan2;
 extern CAN_RxHeaderTypeDef RxHeader;
 extern uint8_t RxData[8];
 extern uint32_t TxMailbox1, TxMailbox2;
+extern uint16_t engine_mode;
 
 /* USER CODE END EV */
 
@@ -245,6 +248,51 @@ void CAN1_RX0_IRQHandler(void)
 
   /* USER CODE END CAN1_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan1);
+  HAL_StatusTypeDef status = HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData);
+
+  if (status == HAL_OK){
+	  if (RxHeader.StdId == 0x0A){
+		  CAN_TxHeaderTypeDef TxHeader;
+		  uint8_t* TxData = NULL;
+		  uint16_t apps = ((uint16_t)RxData[1]) << 8;
+		  apps = apps | ((uint16_t)RxData[0]);
+
+		  //send to inverter speeeeeed
+		  CAN_set_speed_command(&TxHeader, &TxData, apps);
+		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+		  {
+			  Error_Handler();
+		  }
+		  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+		  free(TxData);
+	  }
+	  else if (RxHeader.StdId == 0x0B){
+		  if (RxData[1] == 0xFF){
+			  CAN_TxHeaderTypeDef TxHeader;
+			  uint8_t* TxData = NULL;
+			  CAN_stop_speed_command(&TxHeader, &TxData);
+
+			  //send to inverter stop/block
+			  //CAN_set_speed_command(&TxHeader, &TxData, apps);
+			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+			  {
+				  Error_Handler();
+			  }
+			  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+			  free(TxData);
+		  }
+	  }
+	  else if (RxHeader.StdId == 0x0F){
+		  uint16_t engine_mode_new = ((uint16_t)RxData[1]) << 8;
+		  engine_mode_new = engine_mode_new | ((uint16_t)RxData[0]);
+		  engine_mode = engine_mode_new;
+		  // change engine mode
+	  }
+  }
+  else{
+	  Error_Handler();
+  }
+
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
 //  if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
 //	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);

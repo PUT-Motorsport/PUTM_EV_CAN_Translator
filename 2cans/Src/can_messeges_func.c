@@ -3,6 +3,9 @@
 
 uint16_t MAX_SPEED = 32767;
 
+extern uint16_t engine_mode;
+
+
 void CAN_dummy_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	TxHeader->StdId = 0x321;
 //	TxHeader->ExtId = 0x00;
@@ -44,6 +47,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 	(*TxData)[0] = 0x31;
 
 	uint16_t val = (MAX_SPEED / 200) * apps;
+//	uint16_t val =
 
 	//Value Range for 10% speed num.
 	//Head 3277 == 0x0CCD
