@@ -285,7 +285,7 @@ void TIM2_IRQHandler(void)
 
   if(engine_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
   	  //message to apps that engine is not responding
-	  //HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
   }
 
   /* USER CODE END TIM2_IRQn 0 */
