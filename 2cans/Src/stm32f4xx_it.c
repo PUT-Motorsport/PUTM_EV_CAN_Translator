@@ -255,17 +255,33 @@ void CAN1_RX0_IRQHandler(void)
 	  }
 	  else if(RxHeader_CAN1.StdId == 0x0C){
 		  if(RxData_CAN1[3] == 0x66){
-			  CAN_TxHeaderTypeDef TxHeader;
-			  uint8_t* TxData = NULL;
-
-			  CAN_disable_controller_command(&TxHeader, &TxData);
-
-			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
 			  {
-				Error_Handler();
+				  CAN_TxHeaderTypeDef TxHeader;
+				  uint8_t* TxData = NULL;
+
+				  CAN_stop_speed_command(&TxHeader, &TxData);
+
+				  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+				  {
+					Error_Handler();
+				  }
+				  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+				  free(TxData);
 			  }
-			  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-			  free(TxData);
+
+			  {
+				  CAN_TxHeaderTypeDef TxHeader;
+				  uint8_t* TxData = NULL;
+
+				  CAN_disable_controller_command(&TxHeader, &TxData);
+
+				  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+				  {
+					Error_Handler();
+				  }
+				  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+				  free(TxData);
+			  }
 		  }
 	  }
   }else{
