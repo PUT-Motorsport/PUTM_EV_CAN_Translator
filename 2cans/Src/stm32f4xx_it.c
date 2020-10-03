@@ -39,7 +39,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define MAX_TIMEOUT_TICKS 30
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -49,7 +49,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+void emegrancy_stop(CAN_HandleTypeDef*);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -60,6 +60,7 @@
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 extern CAN_RxHeaderTypeDef RxHeader_CAN1;
@@ -72,6 +73,10 @@ extern uint32_t TxMailbox1;
 extern uint32_t TxMailbox2;
 
 extern uint16_t engine_mode;
+
+extern uint64_t tim2_counter;
+extern uint64_t apps_timeout_counter;
+extern uint64_t engine_timeout_counter;
 
 /* USER CODE END EV */
 
@@ -237,12 +242,13 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
   if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK){
 	  if(RxHeader_CAN1.StdId == 0x0A){
+		  apps_timeout_counter = tim2_counter;
+
 		  CAN_TxHeaderTypeDef TxHeader;
 		  uint8_t* TxData = NULL;
 
 		  uint16_t apps = ((uint16_t)RxData_CAN1[1]) << 8;
 		  apps = apps | ((uint16_t)RxData_CAN1[0]);
-
 
 		  CAN_set_speed_command(&TxHeader, &TxData, apps);
 
@@ -255,39 +261,38 @@ void CAN1_RX0_IRQHandler(void)
 	  }
 	  else if(RxHeader_CAN1.StdId == 0x0C){
 		  if(RxData_CAN1[3] == 0x66){
-			  {
-				  CAN_TxHeaderTypeDef TxHeader;
-				  uint8_t* TxData = NULL;
-
-				  CAN_stop_speed_command(&TxHeader, &TxData);
-
-				  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-				  {
-					Error_Handler();
-				  }
-				  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-				  free(TxData);
-			  }
-
-			  {
-				  CAN_TxHeaderTypeDef TxHeader;
-				  uint8_t* TxData = NULL;
-
-				  CAN_disable_controller_command(&TxHeader, &TxData);
-
-				  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-				  {
-					Error_Handler();
-				  }
-				  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
-				  free(TxData);
-			  }
+			  emegrancy_stop(&hcan2);
 		  }
 	  }
   }else{
 	Error_Handler();
   }
   /* USER CODE END CAN1_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+  ++tim2_counter;
+
+  if(apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
+	  emegrancy_stop(&hcan2); //message to engine that apps is not responding
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+  }
+
+  if(engine_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
+  	  //message to apps that engine is not responding
+	  //HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+  }
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /**
@@ -305,7 +310,8 @@ void CAN2_RX0_IRQHandler(void)
   		  uint8_t regid = RxData_CAN2[0];
 
   		  if(regid == 0x5e){ //CAN_request_speed_command
-  			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+  			engine_timeout_counter = tim2_counter;
+
   		  }
   		  else if(regid == 0x5f){ //CAN_request_power_command
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
@@ -327,6 +333,34 @@ void CAN2_RX0_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void emegrancy_stop(CAN_HandleTypeDef *hcan){
+	{
+		  CAN_TxHeaderTypeDef TxHeader;
+		  uint8_t* TxData = NULL;
 
+		  CAN_stop_speed_command(&TxHeader, &TxData);
+
+		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+		  {
+			Error_Handler();
+		  }
+		  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+		  free(TxData);
+	  }
+
+	  {
+		  CAN_TxHeaderTypeDef TxHeader;
+		  uint8_t* TxData = NULL;
+
+		  CAN_disable_controller_command(&TxHeader, &TxData);
+
+		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+		  {
+			Error_Handler();
+		  }
+		  while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+		  free(TxData);
+	  }
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
