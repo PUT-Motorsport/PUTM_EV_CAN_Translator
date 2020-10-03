@@ -62,10 +62,11 @@ extern CAN_HandleTypeDef hcan;
 extern uint8_t TxDataStop[8];
 extern CAN_TxHeaderTypeDef TxHeaderStop;
 
+extern uint16_t i;
 /* USER CODE END EV */
 
 /******************************************************************************/
-/*           Cortex-M4 Processor Interruption and Exception Handlers          */ 
+/*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
@@ -211,28 +212,33 @@ void EXTI15_10_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
-	TxHeaderStop.StdId = 0x0C;
-	TxHeaderStop.RTR = CAN_RTR_DATA;
-	TxHeaderStop.IDE = CAN_ID_STD;
-	TxHeaderStop.DLC = 8;
-	TxHeaderStop.TransmitGlobalTime = DISABLE;
+//	TxHeaderStop.StdId = 0x0C;
+//	TxHeaderStop.RTR = CAN_RTR_DATA;
+//	TxHeaderStop.IDE = CAN_ID_STD;
+//	TxHeaderStop.DLC = 8;
+//	TxHeaderStop.TransmitGlobalTime = DISABLE;
+//
+//	TxDataStop[0] = 0xFF;
+//	TxDataStop[1] = 0xFF;
+//	TxDataStop[2] = 0xFF;
+//	TxDataStop[3] = 0x66;
+//	TxDataStop[4] = 0xFF;
+//	TxDataStop[5] = 0xFF;
+//	TxDataStop[6] = 0xFF;
+//	TxDataStop[7] = 0xFF;
+//
+//	uint32_t pTxMailbox;
+//
+//	HAL_CAN_AddTxMessage(&hcan, &TxHeaderStop, TxDataStop, &pTxMailbox);
+//	while(HAL_CAN_IsTxMessagePending(&hcan, &pTxMailbox));
+//
+//
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
-	TxDataStop[0] = 0xFF;
-	TxDataStop[1] = 0xFF;
-	TxDataStop[2] = 0xFF;
-	TxDataStop[3] = 0x66;
-	TxDataStop[4] = 0xFF;
-	TxDataStop[5] = 0xFF;
-	TxDataStop[6] = 0xFF;
-	TxDataStop[7] = 0xFF;
-
-	uint32_t pTxMailbox;
-
-	HAL_CAN_AddTxMessage(&hcan, &TxHeaderStop, TxDataStop, &pTxMailbox);
-	while(HAL_CAN_IsTxMessagePending(&hcan, &pTxMailbox));
-
-
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+  i+=5;
+  if(i>50){
+	  i = 50;
+  }
 
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
