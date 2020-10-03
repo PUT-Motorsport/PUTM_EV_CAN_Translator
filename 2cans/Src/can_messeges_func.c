@@ -71,7 +71,7 @@ void CAN_request_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
 	(*TxData)[1] = 0x5e; //(SPEED_FILTER_) Filter speed actual value
-	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
 
 void CAN_request_power_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
@@ -85,7 +85,7 @@ void CAN_request_power_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
 	(*TxData)[1] = 0x5f; //(I_IST_FILT) Filtered actual current
-	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
 
 void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
@@ -99,7 +99,7 @@ void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDa
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
 	(*TxData)[1] = 0x4A; //(T_IGBT) power stage temperature
-	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
 
 void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
@@ -113,7 +113,7 @@ void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxD
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
 	(*TxData)[1] = 0x49; //(T_MOTOR) motor temperature
-	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
 
 void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
@@ -127,5 +127,5 @@ void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDat
 
 	(*TxData)[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
 	(*TxData)[1] = 0x4B; //(T_AIR) air temperature
-	(*TxData)[2] = 0xFE; //For the repeating time 100ms the input in byte 2 is
+	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
