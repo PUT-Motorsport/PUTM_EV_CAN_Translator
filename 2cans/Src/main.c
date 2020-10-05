@@ -57,9 +57,14 @@ uint8_t RxData_CAN2[8];
 uint32_t TxMailbox1;
 uint32_t TxMailbox2;
 
+uint16_t inverter_RPM;
+uint16_t inverter_RMS;
+uint16_t inverter_status;
+uint8_t inverter_temp_IGBT;
+uint8_t inverter_temp_engine;
+
 uint16_t engine_mode;
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
-
 
 uint64_t tim2_counter = 0;
 uint64_t apps_timeout_counter = 0;

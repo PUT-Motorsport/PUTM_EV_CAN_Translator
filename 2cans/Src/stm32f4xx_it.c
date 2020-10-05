@@ -78,6 +78,12 @@ extern uint64_t tim2_counter;
 extern uint64_t apps_timeout_counter;
 extern uint64_t engine_timeout_counter;
 
+extern uint16_t inverter_RPM;
+extern uint16_t inverter_RMS;
+extern uint16_t inverter_status;
+extern uint8_t inverter_temp_IGBT;
+extern uint8_t iverter_temp_engine;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -312,17 +318,28 @@ void CAN2_RX0_IRQHandler(void)
   		  if(regid == 0x5e){ //CAN_request_speed_command
   			engine_timeout_counter = tim2_counter;
 
+  			inverter_RPM = 0x0000;
+  			inverter_RPM = (uint16_t)(RxData_CAN2[2] << 8);
+  			inverter_RPM |= (uint16_t)RxData_CAN2[1];
   		  }
   		  else if(regid == 0x5f){ //CAN_request_power_command
+  			inverter_RMS = 0x0000;
+  			inverter_RMS = (uint16_t)(RxData_CAN2[2] << 8);
+  			inverter_RMS |= (uint16_t)RxData_CAN2[1];
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
   		  }
   		  else if(regid == 0x4A){ //CAN_request_igbt_temp_command
+  			inverter_temp_IGBT;
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
   		  }
   		  else if(regid == 0x49){ //CAN_request_motor_temp_command
+  			  inverter_temp_engine;
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
   		  }
-  		  else if(regid == 0x4B){ //CAN_request_air_temp_command
+  		  else if(regid == 0x4B){ //CAN_request_air_temp_command //change. we need inverter's status not air temp
+  			inverter_status = 0x0000;
+  			inverter_status = (uint16_t)(RxData_CAN2[2] << 8);
+  			inverter_status |= (uint16_t)RxData_CAN2[1];
   			;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
   		  }
   	  }
