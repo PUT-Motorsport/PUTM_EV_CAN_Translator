@@ -4,6 +4,7 @@
 uint16_t MAX_SPEED = 32767;
 
 extern uint16_t engine_mode;
+extern uint16_t inverter_igbt_temp_table[];
 
 
 void CAN_disable_controller_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
@@ -129,3 +130,59 @@ void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDat
 	(*TxData)[1] = 0x4B; //(T_AIR) air temperature
 	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
+
+void CAN_request_status_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
+	//TODO
+}
+
+uint8_t calculate_IGBT_temperature(uint16_t val){ 	// TODO
+	uint8_t res = 0xFF;								// TODO
+	uint8_t i = 0;
+
+	while(val > inverter_igbt_temp_table[i] && i < 20){
+		i++;
+	}
+
+	if(i == 20){
+		return 0xFF;
+	}
+
+    uint8_t x = inverter_igbt_temp_table[i + 1] - inverter_igbt_temp_table[i];
+    uint8_t y = val - inverter_igbt_temp_table[i];
+    res = (i*5) - (x*5/y);
+    return res;
+}
+
+uint8_t calculate_engine_temperature(uint16_t val){
+	//TODO
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
