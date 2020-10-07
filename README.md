@@ -8,6 +8,17 @@ The module is responsible for communication between the motor inverter and the m
 ## Device
 We used our own PCB, which was equipped with 2 CAN transmitters and a STM32F105RB microcontroller.
 
+## Table of contents
+
+- [Hardware setup](#Hardware-setup)
+  * [Pinouts](#Pinouts)
+  * [Clocks](#Clocks)
+  * [Timers](#Timers)
+  * [CANs](#CANs)
+- [Software](#Software)
+  * [CAN inverter functions](#CAN-inverter-functions)
+
+
 ## Hardware setup
 
 ### Pinouts
@@ -57,3 +68,15 @@ We used an external clock speed and set its frequency to **64 MHz** for (`HCLK`)
     - **time quanta 1:** 13
     - **time quanta 2:** 2
     - **time quantum:** 125.0 ns
+
+## Software
+
+### CAN inverter functions
+
+* `CAN_disable_controller_command` - inverter safety shutdown
+* `CAN_set_speed_command` - set the APPS speed value in the range 0-500 (0-100%)
+* `CAN_stop_speed_command` - set the speed value to 0
+* `CAN_request_speed_command` - request that the inverter send information about the current speed
+* `CAN_request_power_command` - request for the inverter to send information about the current current
+* `CAN_request_igbt_temp_command` - request for the inverter to send information about the current igbt temperature
+* `CAN_request_motor_temp_command` - request for the inverter to send information about the current motor temperature
