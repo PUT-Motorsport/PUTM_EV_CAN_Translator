@@ -147,11 +147,11 @@ void CAN_request_status_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData)
 	(*TxData)[2] = 0x0A; //For the repeating time 10ms the input in byte 2 is
 }
 
-uint8_t calculate_IGBT_temperature(uint16_t val){ 	// TODO
-	uint8_t res = 0xFF;								// TODO
+uint8_t calculate_IGBT_temperature(uint16_t val){
+	uint8_t res = 0xFF;
 	uint8_t i = 0;
 
-	while(val > inverter_igbt_temp_table[i] && i < 20){
+	while(val >= inverter_igbt_temp_table[i] && i < 20){
 		i++;
 	}
 
@@ -159,10 +159,11 @@ uint8_t calculate_IGBT_temperature(uint16_t val){ 	// TODO
 		return 0xFF;
 	}
 
-    uint8_t x = inverter_igbt_temp_table[i + 1] - inverter_igbt_temp_table[i];
-    uint8_t y = val - inverter_igbt_temp_table[i];
-    res = (i*5) - (x*y/5);
-    return res;
+	float x = (float)(inverter_igbt_temp_table[i] - inverter_igbt_temp_table[i - 1]);
+	float y = (float)(val - inverter_igbt_temp_table[i - 1]);
+
+	res = (uint8_t)(((i - 1) * 5.0) + (y * 5.0 / x));
+	return res;
 }
 
 uint8_t calculate_engine_temperature(uint16_t val){
