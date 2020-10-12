@@ -69,11 +69,11 @@ uint8_t inverter_temp_IGBT;
 uint8_t inverter_temp_engine;
 uint16_t inverter_temp_IGBT_raw;
 uint16_t inverter_temp_engine_raw;
+uint16_t inverter_temp_air_raw;
 
 uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
 		  19247, 19733, 20250, 20793, 21357, 21933, 22515, 23097,
 		  23671, 24232, 24775, 25296, 25792, 26261, 26702};
-
 
 uint16_t engine_mode;
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
@@ -83,6 +83,7 @@ uint32_t apps_timeout_counter;
 uint32_t engine_timeout_counter;
 
 uint8_t send_inverter_data;
+uint8_t inverter_stopped;
 
 /* USER CODE END PV */
 
@@ -139,6 +140,8 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
 
   engine_mode = 100;
 
@@ -237,32 +240,45 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  if(send_inverter_data){
-//		  /*
-//		   * inverter_RPM; 			// 0x5E
-//		   * inverter_RMS;			// 0x5F
-//		   * inverter_status;		// 0xXX
-//		   * inverter_temp_IGBT;	// 0x4A
-//		   * inverter_temp_engine;	// 0x49
-//		   */
-//		  inverter_temp_IGBT = 0xFF; 		// TODO calculate value from inverter_IGBT_engine_raw
-//		  inverter_temp_engine = 0xFF; 		// TODO calculate value from inverter_temp_engine_raw
-//		  inverter_status = 0; 				// TODO
-//
-//		  inverter_data[0] = (uint8_t)(inverter_RPM & 0xFF);
-//		  inverter_data[1] = (uint8_t)(inverter_RPM >> 8);
-//		  inverter_data[2] = (uint8_t)(inverter_RMS & 0xFF);
-//		  inverter_data[3] = (uint8_t)(inverter_RMS >> 8);
-//		  inverter_data[4] = (uint8_t)(inverter_status & 0xFF); // TODO
-//		  inverter_data[5] = (uint8_t)(inverter_status >> 8);	// TODO
-//		  inverter_data[6] = inverter_temp_engine;				// TODO
-//		  inverter_data[7] = inverter_temp_IGBT;				// TODO
-//
-//		  if(HAL_CAN_AddTxMessage(&hcan1, &tx_header_inverter_data, inverter_data, &mail_data_inverter) != HAL_OK){
-//			  Error_Handler();
-//		  }
-//		  send_inverter_data = 0;
-//	  }
+	  if(send_inverter_data && !inverter_stopped){
+		  /*
+		   * inverter_RPM; 			// 0x5E
+		   * inverter_RMS;			// 0x5F
+		   * inverter_status;		// 0xXX
+		   * inverter_temp_IGBT;	// 0x4A
+		   * inverter_temp_engine;	// 0x49
+		   */
+		  inverter_temp_IGBT = calculate_IGBT_temperature(inverter_temp_IGBT_raw);
+		  inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine); 		// TODO calculate value from inverter_temp_engine_raw
+		  inverter_status = 0; 				// TODO
+
+		  inverter_data[0] = (uint8_t)(inverter_RPM & 0xFF);
+		  inverter_data[1] = (uint8_t)(inverter_RPM >> 8);
+		  inverter_data[2] = (uint8_t)(inverter_RMS & 0xFF);
+		  inverter_data[3] = (uint8_t)(inverter_RMS >> 8);
+		  inverter_data[4] = (uint8_t)(inverter_status & 0xFF); // TODO
+		  inverter_data[5] = (uint8_t)(inverter_status >> 8);	// TODO
+		  inverter_data[6] = inverter_temp_engine;				// TODO
+		  inverter_data[7] = inverter_temp_IGBT;				// TODO
+
+		  if(HAL_CAN_AddTxMessage(&hcan1, &tx_header_inverter_data, inverter_data, &mail_data_inverter) != HAL_OK){
+			  Error_Handler();
+		  }
+		  send_inverter_data = 0;
+	  }
+
+	  if(inverter_stopped == 1){
+		  CAN_TxHeaderTypeDef TxHeader_inverter_stopped;
+		  uint8_t TxData[2] = {0x0A, 0x0A};
+		  TxHeader_inverter_stopped.StdId = 0x07;
+		  TxHeader_inverter_stopped.IDE = CAN_ID_STD;
+		  TxHeader_inverter_stopped.RTR = CAN_RTR_DATA;
+		  TxHeader_inverter_stopped.TransmitGlobalTime = DISABLE;
+		  TxHeader_inverter_stopped.DLC = 2;
+
+		  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_inverter_stopped, TxData, &TxMailbox1);
+		  HAL_Delay(10);
+	  }
 
   }
   /* USER CODE END 3 */
@@ -549,12 +565,13 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 static void CAN_requests_Init(void){
-	request_list_type requests[5] = {
+	request_list_type requests[6] = {
 			&CAN_request_speed_command,
 			&CAN_request_power_command,
 			&CAN_request_igbt_temp_command,
 			&CAN_request_motor_temp_command,
-			&CAN_request_air_temp_command
+			&CAN_request_air_temp_command,
+			&CAN_request_status_command
 	};
 
 	for (int i = 0; i < 5; ++i){
@@ -569,8 +586,12 @@ static void CAN_requests_Init(void){
 	    }
 
 	    while(HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
+
+	    HAL_Delay(3);
 	    free(TxData);
 	}
+
+    HAL_Delay(10);
 }
 
 /* USER CODE END 4 */
