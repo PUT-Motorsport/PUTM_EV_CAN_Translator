@@ -71,11 +71,18 @@ uint16_t inverter_temp_IGBT_raw;
 uint16_t inverter_temp_engine_raw;
 uint16_t inverter_temp_air_raw;
 
+uint16_t inverter_RPM_N_MAX;
+uint16_t inverter_RPM_LIMIT;
+
 uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
 		  19247, 19733, 20250, 20793, 21357, 21933, 22515, 23097,
 		  23671, 24232, 24775, 25296, 25792, 26261, 26702};
 
+uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
+		11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
+
 uint16_t engine_mode;
+
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
 
 uint32_t tim2_counter;
@@ -84,6 +91,8 @@ uint32_t engine_timeout_counter;
 
 uint8_t send_inverter_data;
 uint8_t inverter_stopped;
+uint8_t send_stop_limit;
+uint8_t send_stop_N_nom;
 
 /* USER CODE END PV */
 
@@ -145,10 +154,12 @@ int main(void)
 
   engine_mode = 100;
 
+  inverter_RPM_N_MAX = 0;
+  inverter_RPM_LIMIT = 0;
+
   tim2_counter = 0;
   apps_timeout_counter = 0;
   engine_timeout_counter = 0;
-
 
   send_inverter_data = 0;
 
@@ -249,11 +260,21 @@ int main(void)
 		   * inverter_temp_engine;	// 0x49
 		   */
 		  inverter_temp_IGBT = calculate_IGBT_temperature(inverter_temp_IGBT_raw);
-		  inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine); 		// TODO calculate value from inverter_temp_engine_raw
+		  inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine_raw); 		// TODO calculate value from inverter_temp_engine_raw
 		  inverter_status = 0; 				// TODO
 
-		  inverter_data[0] = (uint8_t)(inverter_RPM & 0xFF);
-		  inverter_data[1] = (uint8_t)(inverter_RPM >> 8);
+		  uint16_t inverter_RPM_to_send = 0;
+
+		  if (inverter_RPM_LIMIT == 0 && inverter_RPM_N_MAX == 0) {
+			  inverter_RPM_to_send = 0x7FFF;
+		  }
+		  else {
+			  //inverter_RPM = inverter_RPM / inverter_RPM_N_MAX * inverter_RPM_LIMIT;
+			  inverter_RPM_to_send = (uint16_t)((float)inverter_RPM / 32767.0f * (float)inverter_RPM_N_MAX);
+		  }
+
+		  inverter_data[1] = (uint8_t)(inverter_RPM_to_send & 0x00FF);
+		  inverter_data[0] = (uint8_t)(inverter_RPM_to_send >> 8);
 		  inverter_data[2] = (uint8_t)(inverter_RMS & 0xFF);
 		  inverter_data[3] = (uint8_t)(inverter_RMS >> 8);
 		  inverter_data[4] = (uint8_t)(inverter_status & 0xFF); // TODO
@@ -565,16 +586,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 static void CAN_requests_Init(void){
-	request_list_type requests[6] = {
+	request_list_type requests[8] = {
 			&CAN_request_speed_command,
 			&CAN_request_power_command,
 			&CAN_request_igbt_temp_command,
 			&CAN_request_motor_temp_command,
 			&CAN_request_air_temp_command,
-			&CAN_request_status_command
+			&CAN_request_status_command,
+			&CAN_request_N_max_command,
+			&CAN_request_speed_limit_command
 	};
 
-	for (int i = 0; i < 5; ++i){
+	for (int i = 0; i < 8; ++i){
 		CAN_TxHeaderTypeDef TxHeader;
 	    uint8_t* TxData = NULL;
 
