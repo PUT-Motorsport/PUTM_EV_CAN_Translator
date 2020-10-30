@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
+#include "inverter_register_codes.h"
 
 /* USER CODE END Includes */
 
@@ -75,6 +76,7 @@ extern uint32_t TxMailbox2;
 extern uint16_t engine_mode;
 
 extern uint16_t inverter_RPM;
+extern uint16_t inverter_RPM_to_send;
 extern uint16_t inverter_RMS;
 extern uint16_t inverter_status;
 extern uint16_t inverter_temp_IGBT_raw;
@@ -91,7 +93,7 @@ extern uint16_t inverter_RPM_LIMIT;
 
 extern uint8_t send_inverter_data;
 extern uint8_t send_stop_limit;
-extern uint8_t send_stop_N_nom;
+extern uint8_t send_stop_N_max;
 
 /* USER CODE END EV */
 
@@ -252,12 +254,22 @@ void CAN1_RX0_IRQHandler(void)
 		  apps = apps | ((int16_t)RxData_CAN1[0]);
 
 		  if (apps > 0){
-			  apps = ((apps * 5 ) / 10); // tEsTy FiUt MoToRsPoRt TOMASZ TUTAJ
+			  apps = ((apps * 5 ) / 10); // TOMASZ TUTAJ
 		  }
-		  else{
-			  //apps = -10;				// -2.5%
-			  //apps = -50;				// -5%
-			  apps = 0;				// 0% to tak zeby szybko cofnąć
+		  else if (apps == 0 && inverter_RPM_to_send > 0){
+			  apps = 0;			// 0%
+			  //apps = -10;		// -2.5%
+			  //apps = -50;		// -5%
+			  //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+		  }
+
+		  if (apps > 500){
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
+
+			  emegrancy_stop(&hcan2);
+			  apps = 0;
 		  }
 
 		  CAN_set_speed_command(&TxHeader, &TxData, apps);
@@ -332,58 +344,49 @@ void CAN2_RX0_IRQHandler(void)
   		  uint8_t regid = RxData_CAN2[0];
 
   		  engine_timeout_counter = tim2_counter;
-  		  //if(regid == 0x5e){ //CAN_request_speed_command		// TODO
-  		  //if(regid == 0x30){ //CAN_request_speed_command		// TODO
-  	  	  if(regid == 0xA8){ //CAN_request_speed_command		// TODO
+  	  	  if(regid == SPEED_ACTUAL_){
   			  inverter_RPM = 0x0000;
   			  inverter_RPM = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM |= (uint16_t)RxData_CAN2[1];
+  			  inverter_RPM |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   			  inverter_RPM = inverter_RPM;
   		  }
-  		  else if(regid == 0x5f){ //CAN_request_power_command
+  		  else if(regid == I_IST_FILT){
   			  inverter_RMS = 0x0000;
   			  inverter_RMS = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RMS |= (uint16_t)RxData_CAN2[1];
-  			  ;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+  			  inverter_RMS |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   		  }
-  		  else if(regid == 0x4A){ //CAN_request_igbt_temp_command
+  		  else if(regid == T_IGBT){
   			  inverter_temp_IGBT_raw = 0x0000;
   			  inverter_temp_IGBT_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_IGBT_raw |= (uint16_t)(RxData_CAN2[1]);
-  			  ;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+  			  inverter_temp_IGBT_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   		  }
-  		  else if(regid == 0x49){ //CAN_request_motor_temp_command
+  		  else if(regid == T_MOTOR){
   			  inverter_temp_engine_raw = 0x0000;
   			  inverter_temp_engine_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_engine_raw |= (uint16_t)(RxData_CAN2[1]);
-  			  ;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+  			  inverter_temp_engine_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   		  }
-  		  else if (regid == 0x4B){
+  		  else if (regid == T_AIR){
   			  inverter_temp_air_raw = 0x0000;
   			  inverter_temp_air_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_air_raw |= (uint16_t)(RxData_CAN2[2] & 0xff);
-
+  			  inverter_temp_air_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   		  }
-  		  else if (regid == 0x59){
+  		  else if (regid == MOTOR_RPMMAX){
   			  inverter_RPM_N_MAX = 0x0000;
   			  inverter_RPM_N_MAX = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM_N_MAX |= (uint16_t)(RxData_CAN2[2] & 0xff);
-  			  send_stop_N_nom = 1;
+  			  inverter_RPM_N_MAX |= (uint16_t)(RxData_CAN2[1] & 0xFF);
+  			  send_stop_N_max = 1;
   		  }
-  		  else if (regid == 0x34){
+  		  else if (regid == SPEED_LIMIT){
   			  inverter_RPM_LIMIT = 0x0000;
   			  inverter_RPM_LIMIT = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM_LIMIT |= (uint16_t)(RxData_CAN2[2] & 0xff);
+  			  inverter_RPM_LIMIT |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   			  send_stop_limit = 1;
   		  }
-  		  /*
-  		  else if(regid == 0x4B){ //CAN_request_air_temp_command //change. we need inverter's status not air temp
+  		  else if (regid == STATUS){
   			  inverter_status = 0x0000;
   			  inverter_status = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_status |= (uint16_t)RxData_CAN2[1];
-  			  ;//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+  			  inverter_status |= (uint16_t)(RxData_CAN2[1] & 0xFF);
   		  }
-  		  */
   	  }
     }else{
     	Error_Handler();

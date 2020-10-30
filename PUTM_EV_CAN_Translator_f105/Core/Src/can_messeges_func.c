@@ -27,7 +27,10 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 		 * apps 1 => 0.2% speed
 		 * apps 2 => 0.4% speed
 		 * apps 3 => 0.6% speed
-		 *
+		 * apps 4 => 0.8% speed
+		 * apps 5 => 1.0% speed
+		 * apps 10 => 2.0% speed
+		 * apps 50 => 10.0% speed
 		 */
 
 	TxHeader->StdId = 0x201;
@@ -73,8 +76,6 @@ void CAN_request_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 	(*TxData) = malloc(3 * sizeof(uint8_t));
 
 	(*TxData)[0] = 0x3D; 			//REGID for reading data from the servo and transmission to the CAN (READ)
-//	(*TxData)[1] = SPEED_FILTER_; 	//(SPEED_FILTER_) Filter speed actual value									//TODO
-//	(*TxData)[1] = SPEED_ACTUAL; 	//(SPEED_ACTUAL) Filter speed actual value
 	(*TxData)[1] = SPEED_ACTUAL_; 	//(SPEED_ACTUAL_) Filter speed actual value
 	(*TxData)[2] = 0x0A; 			//For the repeating time 10ms the input in byte 2 is
 }
