@@ -254,30 +254,35 @@ void CAN1_RX0_IRQHandler(void)
 		  apps = apps | ((int16_t)RxData_CAN1[0]);
 
 		  if (apps > 0){
-			  apps = ((apps * 5 ) / 10); // TOMASZ TUTAJ
+			  apps = ((apps * 10 ) / 10); // TOMASZ TUTAJ
+
+			  //HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 1);
 		  }
 		  else if (apps == 0 && inverter_RPM_to_send > 0){
 			  apps = 0;			// 0%
 			  //apps = -10;		// -2.5%
 			  //apps = -50;		// -5%
 			  //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+
+			  //HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 0);
 		  }
 
 		  if (apps > 500){
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
-
 			  emegrancy_stop(&hcan2);
+			  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
+			  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
 			  apps = 0;
 		  }
 
 		  CAN_set_speed_command(&TxHeader, &TxData, apps);
+		  //if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan2) < 3){
 
+		  HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
 		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
 		  {
-		    Error_Handler();
+			  Error_Handler();
 		  }
+		  //}
 		  free(TxData);
 	  }
 	  else if(RxHeader_CAN1.StdId == 0x0C){
@@ -340,7 +345,7 @@ void CAN2_RX0_IRQHandler(void)
   HAL_CAN_IRQHandler(&hcan2);
   /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
   if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader_CAN2, RxData_CAN2) == HAL_OK){
-	  if(RxHeader_CAN2.StdId == 0x181){
+	  if(RxHeader_CAN2.StdId == RECEIVE_DATA_ID){
   		  uint8_t regid = RxData_CAN2[0];
 
   		  engine_timeout_counter = tim2_counter;

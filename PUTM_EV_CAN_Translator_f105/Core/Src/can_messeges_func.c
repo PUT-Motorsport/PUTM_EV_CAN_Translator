@@ -9,7 +9,7 @@ extern uint16_t inverter_engine_temp_table[];
 
 
 void CAN_disable_controller_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -33,8 +33,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 		 * apps 50 => 10.0% speed
 		 */
 
-	TxHeader->StdId = 0x201;
-//	TxHeader->ExtId = 0x00;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -52,7 +51,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData, uint
 }
 
 void CAN_stop_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -67,7 +66,7 @@ void CAN_stop_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 }
 
 void CAN_request_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -81,7 +80,7 @@ void CAN_request_speed_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 }
 
 void CAN_request_power_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -95,7 +94,7 @@ void CAN_request_power_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 }
 
 void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -109,7 +108,7 @@ void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDa
 }
 
 void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -123,7 +122,7 @@ void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxD
 }
 
 void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -137,7 +136,7 @@ void CAN_request_air_temp_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDat
 }
 
 void CAN_request_status_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -151,7 +150,7 @@ void CAN_request_status_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData)
 }
 
 void CAN_request_N_max_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -165,7 +164,7 @@ void CAN_request_N_max_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
 }
 
 void CAN_request_speed_limit_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -179,7 +178,7 @@ void CAN_request_speed_limit_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** Tx
 }
 
 void CAN_stop_speed_limit_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -193,7 +192,7 @@ void CAN_stop_speed_limit_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxDat
 }
 
 void CAN_stop_N_max_command(CAN_TxHeaderTypeDef* TxHeader, uint8_t** TxData){
-	TxHeader->StdId = 0x201;
+	TxHeader->StdId = TRANSMIT_DATA_ID;
 	TxHeader->RTR = CAN_RTR_DATA;
 	TxHeader->IDE = CAN_ID_STD;
 	TxHeader->DLC = 3;
@@ -225,7 +224,7 @@ uint8_t calculate_IGBT_temperature(uint16_t val){
 	return res;
 }
 
-uint8_t calculate_engine_temperature(uint16_t val){		//TODO always returns 0
+uint8_t calculate_engine_temperature(uint16_t val){
 	uint8_t res = 0xFF;
 	uint8_t i = 0;
 

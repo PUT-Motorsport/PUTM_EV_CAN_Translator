@@ -47,8 +47,6 @@ CAN_HandleTypeDef hcan2;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
-UART_HandleTypeDef huart1;
-
 /* USER CODE BEGIN PV */
 CAN_FilterTypeDef sFilterConfig;
 CAN_FilterTypeDef sFilterConfig2;
@@ -102,7 +100,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
@@ -146,12 +143,11 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_USART1_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
+  HAL_Delay(300); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
 
   engine_mode = 100;
 
@@ -168,9 +164,9 @@ int main(void)
   sFilterConfig.FilterBank = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdHigh = 0x0A << 5;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0xFFFF << 5;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterActivation = ENABLE;
@@ -189,37 +185,31 @@ int main(void)
 
   if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
   {
-  /* Filter configuration Error */
 	  Error_Handler();
   }
 
   if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK)
   {
-    /* Filter configuration Error */
 	  Error_Handler();
   }
 
   if (HAL_CAN_Start(&hcan1) != HAL_OK)
   {
-  /* Start Error */
 	  Error_Handler();
   }
 
   if (HAL_CAN_Start(&hcan2) != HAL_OK)
   {
-    /* Start Error */
 	  Error_Handler();
   }
 
   if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
   {
-  /* Notification Error */
 	  Error_Handler();
   }
 
   if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
   {
-    /* Notification Error */
 	  Error_Handler();
   }
 
@@ -263,7 +253,6 @@ int main(void)
 			  inverter_RPM_to_send = 0x7FFF;
 		  }
 		  else {
-			  //inverter_RPM_to_send = (float)((float)inverter_RPM / inverter_RPM_N_MAX) * inverter_RPM_LIMIT;
 			  inverter_RPM_to_send = (uint16_t)((float)inverter_RPM / 32767.0f * (float)inverter_RPM_N_MAX);
 		  }
 
@@ -290,6 +279,7 @@ int main(void)
 
 		  HAL_CAN_AddTxMessage(&hcan2, &tx_header_inverter_stop_N_max, inverter_data_stop_max, &mail_data_inverter_stop_max);
 		  while(HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_max));
+		  free(inverter_data_stop_max);
 
 	  }
 	  else if (send_stop_limit && !inverter_stopped){
@@ -301,6 +291,7 @@ int main(void)
 
 		  HAL_CAN_AddTxMessage(&hcan2, &tx_header_inverter_stop_limit, inverter_data_stop_limit, &mail_data_inverter_stop_limit);
 		  while(HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_limit));
+		  free(inverter_data_stop_limit);
 	  }
 
 	  if(inverter_stopped == 1){
@@ -530,39 +521,6 @@ static void MX_TIM3_Init(void)
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART1_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -596,6 +554,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure peripheral I/O remapping */
+  __HAL_AFIO_REMAP_USART1_ENABLE();
 
 }
 
@@ -643,7 +616,7 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 	  HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 0);
-	  HAL_NVIC_SystemReset();
+	  //HAL_NVIC_SystemReset();
   /* USER CODE END Error_Handler_Debug */
 }
 

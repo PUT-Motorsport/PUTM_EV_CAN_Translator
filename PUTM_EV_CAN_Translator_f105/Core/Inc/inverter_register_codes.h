@@ -24,4 +24,7 @@
 #define T_MOTOR			0x49	// tested works
 #define T_AIR			0x4B	// tested works
 
+#define TRANSMIT_DATA_ID	0x201
+#define RECEIVE_DATA_ID 	0x181
+
 #endif /* INC_INVERTER_REGISTER_CODES_H_ */
