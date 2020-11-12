@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -147,7 +148,7 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_Delay(300); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
+  HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
 
   engine_mode = 100;
 
@@ -601,8 +602,19 @@ static void CAN_requests_Init(void){
 	    HAL_Delay(3);
 	    free(TxData);
 	}
+	printf("dupa\n");
 
     HAL_Delay(10);
+}
+
+int _write(int32_t file, uint8_t *ptr, int32_t len)
+{
+	int i=0;
+	for(i=0 ; i<len ; i++)
+		ITM_SendChar((*ptr++));
+
+	return len;
+
 }
 
 /* USER CODE END 4 */
