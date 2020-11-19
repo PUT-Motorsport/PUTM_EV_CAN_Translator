@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
-#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -86,6 +85,7 @@ uint16_t engine_mode;
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef*, uint8_t**);
 
 uint32_t tim2_counter;
+uint32_t last_apps_timestamp;
 uint32_t apps_timeout_counter;
 uint32_t engine_timeout_counter;
 
@@ -307,6 +307,7 @@ int main(void)
 		  HAL_CAN_AddTxMessage(&hcan1, &TxHeader_inverter_stopped, TxData, &TxMailbox1);
 		  HAL_Delay(10);
 	  }
+
 
   }
   /* USER CODE END 3 */
@@ -575,18 +576,15 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 static void CAN_requests_Init(void){
-	request_list_type requests[8] = {
+	request_list_type requests[5] = {
 			&CAN_request_speed_command,
-			&CAN_request_power_command,
 			&CAN_request_igbt_temp_command,
 			&CAN_request_motor_temp_command,
-			&CAN_request_air_temp_command,
-			&CAN_request_status_command,
 			&CAN_request_N_max_command,
 			&CAN_request_speed_limit_command
 	};
 
-	for (int i = 0; i < 8; ++i){
+	for (int i = 0; i < 5; ++i){
 		CAN_TxHeaderTypeDef TxHeader;
 	    uint8_t* TxData = NULL;
 
@@ -602,19 +600,8 @@ static void CAN_requests_Init(void){
 	    HAL_Delay(3);
 	    free(TxData);
 	}
-	printf("dupa\n");
 
     HAL_Delay(10);
-}
-
-int _write(int32_t file, uint8_t *ptr, int32_t len)
-{
-	int i=0;
-	for(i=0 ; i<len ; i++)
-		ITM_SendChar((*ptr++));
-
-	return len;
-
 }
 
 /* USER CODE END 4 */
@@ -628,7 +615,6 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 	  HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 0);
-	  //HAL_NVIC_SystemReset();
   /* USER CODE END Error_Handler_Debug */
 }
 

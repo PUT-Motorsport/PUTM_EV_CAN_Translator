@@ -40,7 +40,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define MAX_TIMEOUT_TICKS 50
+#define MAX_TIMEOUT_TICKS 100
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -85,6 +85,7 @@ extern uint16_t inverter_temp_air_raw;
 extern uint32_t tim2_counter;
 extern uint32_t apps_timeout_counter;
 extern uint32_t engine_timeout_counter;
+extern uint32_t last_apps_timestamp;
 
 extern uint8_t inverter_stopped;
 
@@ -119,7 +120,12 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	  HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, 0);
+	  HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, 0);
+	  HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 0);
+	  HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 0);
+	  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
+	  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -239,60 +245,62 @@ void SysTick_Handler(void)
 void CAN1_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
+	if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK){
+		  if(RxHeader_CAN1.StdId == 0x0A){
+			  apps_timeout_counter = tim2_counter;
 
+			  if (last_apps_timestamp + 15 > tim2_counter){
+				  return;
+			  }
+
+			  CAN_TxHeaderTypeDef TxHeader;
+			  uint8_t* TxData = NULL;
+
+			  int16_t apps = ((int16_t)RxData_CAN1[1]) << 8;
+			  apps = apps | ((int16_t)RxData_CAN1[0]);
+
+			  if (apps > 0){
+				  apps = ((apps * 10 ) / 10); // TOMASZ TUTAJ
+
+			  }
+			  else if (apps == 0 && inverter_RPM_to_send > 0){
+				  apps = 0;			// 0%
+				  //apps = -10;		// -2.5%
+				  //apps = -50;		// -5%
+				  //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+
+			  }
+
+			  if (apps > 500){
+				  emegrancy_stop(&hcan2);
+				  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
+				  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
+				  apps = 0;
+			  }
+
+			  CAN_set_speed_command(&TxHeader, &TxData, apps);
+
+			  HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
+			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
+			  {
+				  Error_Handler();
+			  }
+			  free(TxData);
+
+			  last_apps_timestamp = tim2_counter;
+		  }
+		  else if(RxHeader_CAN1.StdId == 0x0C){
+			  if(RxData_CAN1[3] != 0x00){
+				  emegrancy_stop(&hcan2);
+			  }
+		  }
+	  }else{
+		Error_Handler();
+	  }
   /* USER CODE END CAN1_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan1);
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
-  if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK){
-	  if(RxHeader_CAN1.StdId == 0x0A){
-		  apps_timeout_counter = tim2_counter;
 
-		  CAN_TxHeaderTypeDef TxHeader;
-		  uint8_t* TxData = NULL;
-
-		  int16_t apps = ((int16_t)RxData_CAN1[1]) << 8;
-		  apps = apps | ((int16_t)RxData_CAN1[0]);
-
-		  if (apps > 0){
-			  apps = ((apps * 10 ) / 10); // TOMASZ TUTAJ
-
-			  //HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 1);
-		  }
-		  else if (apps == 0 && inverter_RPM_to_send > 0){
-			  apps = 0;			// 0%
-			  //apps = -10;		// -2.5%
-			  //apps = -50;		// -5%
-			  //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
-
-			  //HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 0);
-		  }
-
-		  if (apps > 500){
-			  emegrancy_stop(&hcan2);
-			  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
-			  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
-			  apps = 0;
-		  }
-
-		  CAN_set_speed_command(&TxHeader, &TxData, apps);
-		  //if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan2) < 3){
-
-		  HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
-		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-		  {
-			  Error_Handler();
-		  }
-		  //}
-		  free(TxData);
-	  }
-	  else if(RxHeader_CAN1.StdId == 0x0C){
-		  if(RxData_CAN1[3] != 0x00){
-			  emegrancy_stop(&hcan2);
-		  }
-	  }
-  }else{
-	Error_Handler();
-  }
   /* USER CODE END CAN1_RX0_IRQn 1 */
 }
 
@@ -306,7 +314,7 @@ void TIM2_IRQHandler(void)
 
 	  if(apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
 		  emegrancy_stop(&hcan2); //message to engine that apps is not responding
-		  HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, GPIO_PIN_RESET);
+		  HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
 	  }
 
 	  if(engine_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
