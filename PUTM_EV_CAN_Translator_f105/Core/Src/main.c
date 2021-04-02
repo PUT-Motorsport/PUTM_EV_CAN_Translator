@@ -48,6 +48,8 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
+typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
+
 CAN_FilterTypeDef sFilterConfig;
 CAN_FilterTypeDef sFilterConfig2;
 
@@ -80,10 +82,6 @@ uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 1897
 uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
                                            11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
 
-uint16_t engine_mode;
-
-typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
-
 uint32_t tim2_counter;
 uint32_t last_apps_timestamp;
 uint32_t apps_timeout_counter;
@@ -93,6 +91,9 @@ uint8_t send_inverter_data;
 uint8_t inverter_stopped;
 uint8_t send_stop_limit;
 uint8_t send_stop_N_max;
+
+uint16_t apps_val;
+uint8_t send_apps_val;
 
 /* USER CODE END PV */
 
@@ -155,8 +156,6 @@ int main(void) {
 
     HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
 
-    engine_mode = 100;
-
     inverter_RPM_to_send = 0;
     inverter_RPM_N_MAX = 0;
     inverter_RPM_LIMIT = 0;
@@ -166,6 +165,7 @@ int main(void) {
     engine_timeout_counter = 0;
 
     send_inverter_data = 0;
+    send_apps_val = 0;
 
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -242,6 +242,41 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
+
+        // TODO Send torque to inverter
+        if (send_apps_val && !inverter_stopped){
+            send_apps_val = 0;
+
+            if (apps_val > 0) {
+                apps_val = ((apps_val * 10) / 10); // TOMASZ TUTAJ
+
+            } else if (apps_val == 0 && inverter_RPM_to_send > 0) {
+                apps_val = 0;            // 0%
+                //apps = -10;		// -2.5%
+                //apps = -50;		// -5%
+                //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+
+                //TODO
+                //add function to calculate reverse torque to slow car down
+                //test:
+                //	- use constant torque
+                //	- use function (linear or not)
+
+            }
+
+            CAN_TxHeaderTypeDef TxHeader;
+            uint8_t *TxData = NULL;
+
+            CAN_set_speed_command(&TxHeader, &TxData, apps_val);
+
+            HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
+            if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+                Error_Handler();
+            }
+            free(TxData);
+
+        }
+
         if (send_inverter_data && !inverter_stopped) {
             inverter_temp_IGBT = calculate_IGBT_temperature(inverter_temp_IGBT_raw);
             inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine_raw);

@@ -50,7 +50,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-void emegrancy_stop(CAN_HandleTypeDef *);
+void emergency_stop(CAN_HandleTypeDef *hcan);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -95,6 +95,9 @@ extern uint16_t inverter_RPM_LIMIT;
 extern uint8_t send_inverter_data;
 extern uint8_t send_stop_limit;
 extern uint8_t send_stop_N_max;
+
+extern uint16_t apps_val;
+extern uint8_t send_apps_val;
 
 /* USER CODE END EV */
 
@@ -239,48 +242,22 @@ void CAN1_RX0_IRQHandler(void) {
                 return;
             }
 
-            CAN_TxHeaderTypeDef TxHeader;
-            uint8_t *TxData = NULL;
+            apps_val = 0;
+            apps_val = ((int16_t) RxData_CAN1[1]) << 8;
+            apps_val |= ((int16_t) RxData_CAN1[0]);
 
-            int16_t apps = ((int16_t) RxData_CAN1[1]) << 8;
-            apps = apps | ((int16_t) RxData_CAN1[0]);
-
-            if (apps > 0) {
-                apps = ((apps * 10) / 10); // TOMASZ TUTAJ
-
-            } else if (apps == 0 && inverter_RPM_to_send > 0) {
-                apps = 0;            // 0%
-                //apps = -10;		// -2.5%
-                //apps = -50;		// -5%
-                //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
-
-				//TODO
-				//add function to calculate reverse torque to slow car down
-				//test:
-				//	- use constant torque
-				//	- use function (linear or not)
-
-            }
-
-            if (apps > 500) {
-                emegrancy_stop(&hcan2);
+            if (apps_val > 500) {
+                emergency_stop(&hcan2);
                 HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
                 HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
-                apps = 0;
+                apps_val = 0;
             }
-
-            CAN_set_speed_command(&TxHeader, &TxData, apps);
-
-            HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
-            if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
-                Error_Handler();
-            }
-            free(TxData);
 
             last_apps_timestamp = tim2_counter;
+            send_apps_val = 1;
         } else if (RxHeader_CAN1.StdId == 0x0C) {
             if (RxData_CAN1[3] != 0x00) {
-                emegrancy_stop(&hcan2);
+                emergency_stop(&hcan2);
             }
         }
     } else {
@@ -301,7 +278,7 @@ void TIM2_IRQHandler(void) {
     ++tim2_counter;
 
     if (apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
-        emegrancy_stop(&hcan2); //message to engine that apps is not responding
+        emergency_stop(&hcan2); //message to engine that apps is not responding
         HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
     }
 
@@ -387,33 +364,9 @@ void CAN2_RX0_IRQHandler(void) {
 }
 
 /* USER CODE BEGIN 1 */
-void emegrancy_stop(CAN_HandleTypeDef *hcan) {
-    {
-        CAN_TxHeaderTypeDef TxHeader;
-        uint8_t *TxData = NULL;
-
-        CAN_stop_speed_command(&TxHeader, &TxData);
-
-        if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
-            Error_Handler();
-        }
-        free(TxData);
-    }
-
-    {
-        CAN_TxHeaderTypeDef TxHeader;
-        uint8_t *TxData = NULL;
-
-        CAN_disable_controller_command(&TxHeader, &TxData);
-
-        if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
-            Error_Handler();
-        }
-        free(TxData);
-    }
-    HAL_CAN_Stop(&hcan2);
-
+void emergency_stop(CAN_HandleTypeDef *hcan) {
     inverter_stopped = 1;
+    emergency_stop_communicate(hcan);
 }
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -1,3 +1,4 @@
+#include <main.h>
 #include "can_messeges_func.h"
 #include "inverter_register_codes.h"
 
@@ -243,19 +244,33 @@ uint8_t calculate_engine_temperature(uint16_t val){
 	return res;
 }
 
+void emergency_stop_communicate(CAN_HandleTypeDef *hcan) {
+    {
+        CAN_TxHeaderTypeDef TxHeader;
+        uint8_t *TxData = NULL;
+        uint32_t TxMailbox2;
 
+        CAN_stop_speed_command(&TxHeader, &TxData);
 
+        if (HAL_CAN_AddTxMessage(hcan, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+            Error_Handler();
+        }
+        free(TxData);
+    }
 
+    {
+        CAN_TxHeaderTypeDef TxHeader;
+        uint8_t *TxData = NULL;
+        uint32_t TxMailbox2;
 
+        CAN_disable_controller_command(&TxHeader, &TxData);
 
-
-
-
-
-
-
-
-
-
+        if (HAL_CAN_AddTxMessage(hcan, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+            Error_Handler();
+        }
+        free(TxData);
+    }
+    HAL_CAN_Stop(hcan);
+}
 
 

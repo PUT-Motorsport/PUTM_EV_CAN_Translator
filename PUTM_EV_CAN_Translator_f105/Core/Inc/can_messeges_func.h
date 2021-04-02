@@ -13,7 +13,6 @@ void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef*, uint8_t**);
 void CAN_request_air_temp_command(CAN_TxHeaderTypeDef*, uint8_t**);
 void CAN_request_status_command(CAN_TxHeaderTypeDef*, uint8_t**);
 void CAN_request_N_max_command(CAN_TxHeaderTypeDef*, uint8_t**);
-void CAN_request_N_max_command(CAN_TxHeaderTypeDef*, uint8_t**);
 void CAN_request_speed_limit_command(CAN_TxHeaderTypeDef*, uint8_t**);
 
 void CAN_stop_N_max_command(CAN_TxHeaderTypeDef*, uint8_t**);
@@ -21,3 +20,6 @@ void CAN_stop_speed_limit_command(CAN_TxHeaderTypeDef*, uint8_t**);
 
 uint8_t calculate_IGBT_temperature(uint16_t);
 uint8_t calculate_engine_temperature(uint16_t);
+
+void emergency_stop_communicate(CAN_HandleTypeDef*);
+
