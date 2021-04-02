@@ -61,5 +61,11 @@ dkms.conf
 .cproject
 .settings
 
+*/.idea/
+*/cmake-build-debug
+CMakeLists*
+
 *.zip
+
+hardware/fp-info-cache
 

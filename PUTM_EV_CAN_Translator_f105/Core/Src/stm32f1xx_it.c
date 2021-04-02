@@ -50,7 +50,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-void emegrancy_stop(CAN_HandleTypeDef*);
+void emegrancy_stop(CAN_HandleTypeDef *);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -104,132 +104,119 @@ extern uint8_t send_stop_N_max;
 /**
   * @brief This function handles Non maskable interrupt.
   */
-void NMI_Handler(void)
-{
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+void NMI_Handler(void) {
+    /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+    /* USER CODE END NonMaskableInt_IRQn 0 */
+    /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
 
-  /* USER CODE END NonMaskableInt_IRQn 1 */
+    /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
   * @brief This function handles Hard fault interrupt.
   */
-void HardFault_Handler(void)
-{
-  /* USER CODE BEGIN HardFault_IRQn 0 */
-	  HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, 0);
-	  HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, 0);
-	  HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 0);
-	  HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 0);
-	  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
-	  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
-  }
+void HardFault_Handler(void) {
+    /* USER CODE BEGIN HardFault_IRQn 0 */
+    HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, 0);
+    HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, 0);
+    HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 0);
+    HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 0);
+    HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
+    HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
+    /* USER CODE END HardFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+        /* USER CODE END W1_HardFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Memory management fault.
   */
-void MemManage_Handler(void)
-{
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+void MemManage_Handler(void) {
+    /* USER CODE BEGIN MemoryManagement_IRQn 0 */
 
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-    /* USER CODE END W1_MemoryManagement_IRQn 0 */
-  }
+    /* USER CODE END MemoryManagement_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+        /* USER CODE END W1_MemoryManagement_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Prefetch fault, memory access fault.
   */
-void BusFault_Handler(void)
-{
-  /* USER CODE BEGIN BusFault_IRQn 0 */
+void BusFault_Handler(void) {
+    /* USER CODE BEGIN BusFault_IRQn 0 */
 
-  /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
-    /* USER CODE END W1_BusFault_IRQn 0 */
-  }
+    /* USER CODE END BusFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+        /* USER CODE END W1_BusFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Undefined instruction or illegal state.
   */
-void UsageFault_Handler(void)
-{
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
+void UsageFault_Handler(void) {
+    /* USER CODE BEGIN UsageFault_IRQn 0 */
 
-  /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
-    /* USER CODE END W1_UsageFault_IRQn 0 */
-  }
+    /* USER CODE END UsageFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+        /* USER CODE END W1_UsageFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles System service call via SWI instruction.
   */
-void SVC_Handler(void)
-{
-  /* USER CODE BEGIN SVCall_IRQn 0 */
+void SVC_Handler(void) {
+    /* USER CODE BEGIN SVCall_IRQn 0 */
 
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
+    /* USER CODE END SVCall_IRQn 0 */
+    /* USER CODE BEGIN SVCall_IRQn 1 */
 
-  /* USER CODE END SVCall_IRQn 1 */
+    /* USER CODE END SVCall_IRQn 1 */
 }
 
 /**
   * @brief This function handles Debug monitor.
   */
-void DebugMon_Handler(void)
-{
-  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
+void DebugMon_Handler(void) {
+    /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-  /* USER CODE END DebugMonitor_IRQn 0 */
-  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 0 */
+    /* USER CODE BEGIN DebugMonitor_IRQn 1 */
 
-  /* USER CODE END DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
 /**
   * @brief This function handles Pendable request for system service.
   */
-void PendSV_Handler(void)
-{
-  /* USER CODE BEGIN PendSV_IRQn 0 */
+void PendSV_Handler(void) {
+    /* USER CODE BEGIN PendSV_IRQn 0 */
 
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
+    /* USER CODE END PendSV_IRQn 0 */
+    /* USER CODE BEGIN PendSV_IRQn 1 */
 
-  /* USER CODE END PendSV_IRQn 1 */
+    /* USER CODE END PendSV_IRQn 1 */
 }
 
 /**
   * @brief This function handles System tick timer.
   */
-void SysTick_Handler(void)
-{
-  /* USER CODE BEGIN SysTick_IRQn 0 */
+void SysTick_Handler(void) {
+    /* USER CODE BEGIN SysTick_IRQn 0 */
 
-  /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
+    /* USER CODE END SysTick_IRQn 0 */
+    HAL_IncTick();
+    /* USER CODE BEGIN SysTick_IRQn 1 */
 
-  /* USER CODE END SysTick_IRQn 1 */
+    /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -242,201 +229,191 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles CAN1 RX0 interrupt.
   */
-void CAN1_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
-	if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK){
-		  if(RxHeader_CAN1.StdId == 0x0A){
-			  apps_timeout_counter = tim2_counter;
+void CAN1_RX0_IRQHandler(void) {
+    /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
+    if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader_CAN1, RxData_CAN1) == HAL_OK) {
+        if (RxHeader_CAN1.StdId == 0x0A) {
+            apps_timeout_counter = tim2_counter;
 
-			  if (last_apps_timestamp + 15 > tim2_counter){
-				  return;
-			  }
+            if (last_apps_timestamp + 15 > tim2_counter) {
+                return;
+            }
 
-			  CAN_TxHeaderTypeDef TxHeader;
-			  uint8_t* TxData = NULL;
+            CAN_TxHeaderTypeDef TxHeader;
+            uint8_t *TxData = NULL;
 
-			  int16_t apps = ((int16_t)RxData_CAN1[1]) << 8;
-			  apps = apps | ((int16_t)RxData_CAN1[0]);
+            int16_t apps = ((int16_t) RxData_CAN1[1]) << 8;
+            apps = apps | ((int16_t) RxData_CAN1[0]);
 
-			  if (apps > 0){
-				  apps = ((apps * 10 ) / 10); // TOMASZ TUTAJ
+            if (apps > 0) {
+                apps = ((apps * 10) / 10); // TOMASZ TUTAJ
 
-			  }
-			  else if (apps == 0 && inverter_RPM_to_send > 0){
-				  apps = 0;			// 0%
-				  //apps = -10;		// -2.5%
-				  //apps = -50;		// -5%
-				  //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+            } else if (apps == 0 && inverter_RPM_to_send > 0) {
+                apps = 0;            // 0%
+                //apps = -10;		// -2.5%
+                //apps = -50;		// -5%
+                //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
 
-			  }
+				//TODO
+				//add function to calculate reverse torque to slow car down
+				//test:
+				//	- use constant torque
+				//	- use function (linear or not)
 
-			  if (apps > 500){
-				  emegrancy_stop(&hcan2);
-				  HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
-				  HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
-				  apps = 0;
-			  }
+            }
 
-			  CAN_set_speed_command(&TxHeader, &TxData, apps);
+            if (apps > 500) {
+                emegrancy_stop(&hcan2);
+                HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
+                HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 0);
+                apps = 0;
+            }
 
-			  HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
-			  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-			  {
-				  Error_Handler();
-			  }
-			  free(TxData);
+            CAN_set_speed_command(&TxHeader, &TxData, apps);
 
-			  last_apps_timestamp = tim2_counter;
-		  }
-		  else if(RxHeader_CAN1.StdId == 0x0C){
-			  if(RxData_CAN1[3] != 0x00){
-				  emegrancy_stop(&hcan2);
-			  }
-		  }
-	  }else{
-		Error_Handler();
-	  }
-  /* USER CODE END CAN1_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan1);
-  /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
+            HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
+            if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+                Error_Handler();
+            }
+            free(TxData);
 
-  /* USER CODE END CAN1_RX0_IRQn 1 */
+            last_apps_timestamp = tim2_counter;
+        } else if (RxHeader_CAN1.StdId == 0x0C) {
+            if (RxData_CAN1[3] != 0x00) {
+                emegrancy_stop(&hcan2);
+            }
+        }
+    } else {
+        Error_Handler();
+    }
+    /* USER CODE END CAN1_RX0_IRQn 0 */
+    HAL_CAN_IRQHandler(&hcan1);
+    /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
+
+    /* USER CODE END CAN1_RX0_IRQn 1 */
 }
 
 /**
   * @brief This function handles TIM2 global interrupt.
   */
-void TIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM2_IRQn 0 */
-	  ++tim2_counter;
+void TIM2_IRQHandler(void) {
+    /* USER CODE BEGIN TIM2_IRQn 0 */
+    ++tim2_counter;
 
-	  if(apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
-		  emegrancy_stop(&hcan2); //message to engine that apps is not responding
-		  HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
-	  }
+    if (apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
+        emegrancy_stop(&hcan2); //message to engine that apps is not responding
+        HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
+    }
 
-	  if(engine_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter){
-	  	  //message to apps that engine is not responding
-		  HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
-	  }
-  /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
-  /* USER CODE BEGIN TIM2_IRQn 1 */
+    if (engine_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
+        //message to apps that engine is not responding
+        HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
+    }
+    /* USER CODE END TIM2_IRQn 0 */
+    HAL_TIM_IRQHandler(&htim2);
+    /* USER CODE BEGIN TIM2_IRQn 1 */
 
-  /* USER CODE END TIM2_IRQn 1 */
+    /* USER CODE END TIM2_IRQn 1 */
 }
 
 /**
   * @brief This function handles TIM3 global interrupt.
   */
-void TIM3_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-	send_inverter_data = 1;
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
+void TIM3_IRQHandler(void) {
+    /* USER CODE BEGIN TIM3_IRQn 0 */
+    send_inverter_data = 1;
+    /* USER CODE END TIM3_IRQn 0 */
+    HAL_TIM_IRQHandler(&htim3);
+    /* USER CODE BEGIN TIM3_IRQn 1 */
 
-  /* USER CODE END TIM3_IRQn 1 */
+    /* USER CODE END TIM3_IRQn 1 */
 }
 
 /**
   * @brief This function handles CAN2 RX0 interrupt.
   */
-void CAN2_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
+void CAN2_RX0_IRQHandler(void) {
+    /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
 
-  /* USER CODE END CAN2_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
-  if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader_CAN2, RxData_CAN2) == HAL_OK){
-	  if(RxHeader_CAN2.StdId == RECEIVE_DATA_ID){
-  		  uint8_t regid = RxData_CAN2[0];
+    /* USER CODE END CAN2_RX0_IRQn 0 */
+    HAL_CAN_IRQHandler(&hcan2);
+    /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
+    if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader_CAN2, RxData_CAN2) == HAL_OK) {
+        if (RxHeader_CAN2.StdId == RECEIVE_DATA_ID) {
+            uint8_t regid = RxData_CAN2[0];
 
-  		  engine_timeout_counter = tim2_counter;
-  	  	  if(regid == SPEED_ACTUAL_){
-  			  inverter_RPM = 0x0000;
-  			  inverter_RPM = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  			  inverter_RPM = inverter_RPM;
-  		  }
-  		  else if(regid == I_IST_FILT){
-  			  inverter_RMS = 0x0000;
-  			  inverter_RMS = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RMS |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  		  }
-  		  else if(regid == T_IGBT){
-  			  inverter_temp_IGBT_raw = 0x0000;
-  			  inverter_temp_IGBT_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_IGBT_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  		  }
-  		  else if(regid == T_MOTOR){
-  			  inverter_temp_engine_raw = 0x0000;
-  			  inverter_temp_engine_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_engine_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  		  }
-  		  else if (regid == T_AIR){
-  			  inverter_temp_air_raw = 0x0000;
-  			  inverter_temp_air_raw = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_temp_air_raw |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  		  }
-  		  else if (regid == MOTOR_RPMMAX){
-  			  inverter_RPM_N_MAX = 0x0000;
-  			  inverter_RPM_N_MAX = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM_N_MAX |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  			  send_stop_N_max = 1;
-  		  }
-  		  else if (regid == SPEED_LIMIT){
-  			  inverter_RPM_LIMIT = 0x0000;
-  			  inverter_RPM_LIMIT = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_RPM_LIMIT |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  			  send_stop_limit = 1;
-  		  }
-  		  else if (regid == STATUS){
-  			  inverter_status = 0x0000;
-  			  inverter_status = (uint16_t)(RxData_CAN2[2] << 8);
-  			  inverter_status |= (uint16_t)(RxData_CAN2[1] & 0xFF);
-  		  }
-  	  }
-    }else{
-    	Error_Handler();
+            engine_timeout_counter = tim2_counter;
+            if (regid == SPEED_ACTUAL_) {
+                inverter_RPM = 0x0000;
+                inverter_RPM = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_RPM |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+                inverter_RPM = inverter_RPM;
+            } else if (regid == I_IST_FILT) {
+                inverter_RMS = 0x0000;
+                inverter_RMS = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_RMS |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+            } else if (regid == T_IGBT) {
+                inverter_temp_IGBT_raw = 0x0000;
+                inverter_temp_IGBT_raw = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_temp_IGBT_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+            } else if (regid == T_MOTOR) {
+                inverter_temp_engine_raw = 0x0000;
+                inverter_temp_engine_raw = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_temp_engine_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+            } else if (regid == T_AIR) {
+                inverter_temp_air_raw = 0x0000;
+                inverter_temp_air_raw = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_temp_air_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+            } else if (regid == MOTOR_RPMMAX) {
+                inverter_RPM_N_MAX = 0x0000;
+                inverter_RPM_N_MAX = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_RPM_N_MAX |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+                send_stop_N_max = 1;
+            } else if (regid == SPEED_LIMIT) {
+                inverter_RPM_LIMIT = 0x0000;
+                inverter_RPM_LIMIT = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_RPM_LIMIT |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+                send_stop_limit = 1;
+            } else if (regid == STATUS) {
+                inverter_status = 0x0000;
+                inverter_status = (uint16_t) (RxData_CAN2[2] << 8);
+                inverter_status |= (uint16_t) (RxData_CAN2[1] & 0xFF);
+            }
+        }
+    } else {
+        Error_Handler();
     }
-  /* USER CODE END CAN2_RX0_IRQn 1 */
+    /* USER CODE END CAN2_RX0_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
-void emegrancy_stop(CAN_HandleTypeDef *hcan){
-	{
-		  CAN_TxHeaderTypeDef TxHeader;
-		  uint8_t* TxData = NULL;
+void emegrancy_stop(CAN_HandleTypeDef *hcan) {
+    {
+        CAN_TxHeaderTypeDef TxHeader;
+        uint8_t *TxData = NULL;
 
-		  CAN_stop_speed_command(&TxHeader, &TxData);
+        CAN_stop_speed_command(&TxHeader, &TxData);
 
-		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-		  {
-			Error_Handler();
-		  }
-		  free(TxData);
-	  }
+        if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+            Error_Handler();
+        }
+        free(TxData);
+    }
 
-	  {
-		  CAN_TxHeaderTypeDef TxHeader;
-		  uint8_t* TxData = NULL;
+    {
+        CAN_TxHeaderTypeDef TxHeader;
+        uint8_t *TxData = NULL;
 
-		  CAN_disable_controller_command(&TxHeader, &TxData);
+        CAN_disable_controller_command(&TxHeader, &TxData);
 
-		  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK)
-		  {
-			Error_Handler();
-		  }
-		  free(TxData);
-	  }
-	  HAL_CAN_Stop(&hcan2);
+        if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+            Error_Handler();
+        }
+        free(TxData);
+    }
+    HAL_CAN_Stop(&hcan2);
 
-	  inverter_stopped = 1;
+    inverter_stopped = 1;
 }
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
