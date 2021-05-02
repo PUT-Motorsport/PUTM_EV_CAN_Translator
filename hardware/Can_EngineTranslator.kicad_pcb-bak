@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 8)
+    (drawings 9)
     (tracks 387)
     (zones 0)
     (modules 63)
@@ -34,7 +34,7 @@
   )
 
   (setup
-    (last_trace_width 0.4)
+    (last_trace_width 0.25)
     (user_trace_width 0.25)
     (user_trace_width 0.4)
     (user_trace_width 0.5)
@@ -3017,6 +3017,9 @@
     )
   )
 
+  (gr_text "PUT Motorsport CAN translator\nM. Przydatek S. Sambor" (at 94 40) (layer B.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
+  )
   (dimension 63 (width 0.15) (layer F.Fab)
     (gr_text "63.000 mm" (at 40.7 64.5 270) (layer F.Fab)
       (effects (font (size 1 1) (thickness 0.15)))
