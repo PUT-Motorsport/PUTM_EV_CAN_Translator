@@ -269,27 +269,25 @@ int main(void) {
             send_inverter_data = 0;
         } else if (send_stop_N_max && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_N_max;
-            uint8_t *inverter_data_stop_max;
+            uint8_t inverter_data_stop_max[3];
             uint32_t mail_data_inverter_stop_max = 0;
 
-            CAN_stop_speed_limit_command(&tx_header_inverter_stop_N_max, &inverter_data_stop_max);
+            CAN_stop_speed_limit_command(&tx_header_inverter_stop_N_max, inverter_data_stop_max);
 
             HAL_CAN_AddTxMessage(&hcan2, &tx_header_inverter_stop_N_max, inverter_data_stop_max,
                                  &mail_data_inverter_stop_max);
             while (HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_max));
-            free(inverter_data_stop_max);
 
         } else if (send_stop_limit && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_limit;
-            uint8_t *inverter_data_stop_limit;
+            uint8_t inverter_data_stop_limit[3];
             uint32_t mail_data_inverter_stop_limit = 0;
 
-            CAN_stop_speed_limit_command(&tx_header_inverter_stop_limit, &inverter_data_stop_limit);
+            CAN_stop_speed_limit_command(&tx_header_inverter_stop_limit, inverter_data_stop_limit);
 
             HAL_CAN_AddTxMessage(&hcan2, &tx_header_inverter_stop_limit, inverter_data_stop_limit,
                                  &mail_data_inverter_stop_limit);
             while (HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_limit));
-            free(inverter_data_stop_limit);
         }
 
         if (inverter_stopped == 1) {
@@ -304,8 +302,6 @@ int main(void) {
             HAL_CAN_AddTxMessage(&hcan1, &TxHeader_inverter_stopped, TxData, &TxMailbox1);
             HAL_Delay(10);
         }
-
-
     }
     /* USER CODE END 3 */
 }
