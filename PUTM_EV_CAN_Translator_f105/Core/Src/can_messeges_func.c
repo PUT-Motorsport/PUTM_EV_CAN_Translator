@@ -36,9 +36,7 @@ void CAN_set_speed_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t *TxData, uint1
     TxHeader->DLC = 3;
     TxHeader->TransmitGlobalTime = DISABLE;
 
-
-//(*TxData)[0] = 0x31; //REGID for the speed command value (SPEED_SOLL)
-    TxData[0] = 0x90; //REGID for the torque command value (TORQUE_SETPOI)
+    TxData[0] = TORQUE_SETPOI;
 
     int16_t val = (MAX_SPEED / 500) * apps;
     TxData[1] = (int8_t)(val & 0x00FF);
@@ -52,7 +50,7 @@ void CAN_stop_speed_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t *TxData) {
     TxHeader->DLC = 3;
     TxHeader->TransmitGlobalTime = DISABLE;
 
-    TxData[0] = 0x31; //REGID for the speed command value (SPEED_SOLL)
+    TxData[0] = SPEED_SOLL;
     TxData[1] = 0x00;
     TxData[2] = 0x00;
 }
@@ -66,9 +64,9 @@ void CAN_request_speed_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) 
 
     (*TxData) = malloc(3 * sizeof(uint8_t));
 
-    (*TxData)[0] = 0x3D;            //REGID for reading data from the servo and transmission to the CAN (READ)
-    (*TxData)[1] = SPEED_ACTUAL_;    //(SPEED_ACTUAL_) Filter speed actual value
-    (*TxData)[2] = 0x0A;            //For the repeating time 10ms the input in byte 2 is
+    (*TxData)[0] = READ_COMMAND;
+    (*TxData)[1] = SPEED_ACTUAL_;
+    (*TxData)[2] = 0x0A;
 }
 
 void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) {
@@ -80,9 +78,9 @@ void CAN_request_igbt_temp_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxDa
 
     (*TxData) = malloc(3 * sizeof(uint8_t));
 
-    (*TxData)[0] = 0x3D;            //REGID for reading data from the servo and transmission to the CAN (READ)
-    (*TxData)[1] = T_IGBT;            //(T_IGBT) power stage temperature
-    (*TxData)[2] = 0x0A;            //For the repeating time 10ms the input in byte 2 is
+    (*TxData)[0] = READ_COMMAND;
+    (*TxData)[1] = T_IGBT;
+    (*TxData)[2] = 0x0A;
 }
 
 void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) {
@@ -94,9 +92,9 @@ void CAN_request_motor_temp_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxD
 
     (*TxData) = malloc(3 * sizeof(uint8_t));
 
-    (*TxData)[0] = 0x3D;            //REGID for reading data from the servo and transmission to the CAN (READ)
-    (*TxData)[1] = T_MOTOR;        //(T_MOTOR) motor temperature
-    (*TxData)[2] = 0x0A;            //For the repeating time 10ms the input in byte 2 is
+    (*TxData)[0] = READ_COMMAND;
+    (*TxData)[1] = T_MOTOR;
+    (*TxData)[2] = 0x0A;
 }
 
 void CAN_request_N_max_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) {
@@ -108,9 +106,9 @@ void CAN_request_N_max_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) 
 
     (*TxData) = malloc(3 * sizeof(uint8_t));
 
-    (*TxData)[0] = 0x3D;            //REGID for reading data from the servo and transmission to the CAN (READ)
-    (*TxData)[1] = MOTOR_RPMMAX;    //(MOTOR_RPMMAX) Rated motor speed
-    (*TxData)[2] = 0x0A;            //For the repeating time 10ms the input in byte 2 is
+    (*TxData)[0] = READ_COMMAND;
+    (*TxData)[1] = MOTOR_RPMMAX;
+    (*TxData)[2] = 0x0A;
 }
 
 void CAN_request_speed_limit_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **TxData) {
@@ -122,9 +120,9 @@ void CAN_request_speed_limit_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t **Tx
 
     (*TxData) = malloc(3 * sizeof(uint8_t));
 
-    (*TxData)[0] = 0x3D;            //REGID for reading data from the servo and transmission to the CAN (READ)
-    (*TxData)[1] = SPEED_LIMIT;    //(SPEED_LIMIT) Speed limit
-    (*TxData)[2] = 0x0A;            //For the repeating time 10ms the input in byte 2 is
+    (*TxData)[0] = READ_COMMAND;
+    (*TxData)[1] = SPEED_LIMIT;
+    (*TxData)[2] = 0x0A;
 }
 
 void CAN_stop_speed_limit_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t *TxData) {
@@ -134,9 +132,9 @@ void CAN_stop_speed_limit_command(CAN_TxHeaderTypeDef *TxHeader, uint8_t *TxData
     TxHeader->DLC = 3;
     TxHeader->TransmitGlobalTime = DISABLE;
 
-    TxData[0] = 0x3D; //REGID for reading data from the servo and transmission to the CAN (READ)
-    TxData[1] = 0x34; //(MOTOR_RPMMAX) air temperature
-    TxData[2] = 0xFF; //For the repeating time 10ms the input in byte 2 is
+    TxData[0] = READ_COMMAND;
+    TxData[1] = SPEED_LIMIT;
+    TxData[2] = 0xFF;
 }
 
 uint8_t calculate_IGBT_temperature(uint16_t val) {
@@ -148,7 +146,7 @@ uint8_t calculate_IGBT_temperature(uint16_t val) {
     }
 
     if (i == 20) {
-        return 0xFF;
+        return res;
     }
 
     float x = (float) (inverter_igbt_temp_table[i] - inverter_igbt_temp_table[i - 1]);
