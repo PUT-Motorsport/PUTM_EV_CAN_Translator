@@ -239,9 +239,6 @@ void CAN1_RX0_IRQHandler(void) {
                 return;
             }
 
-            CAN_TxHeaderTypeDef TxHeader;
-            uint8_t *TxData = NULL;
-
             int16_t apps = ((int16_t) RxData_CAN1[1]) << 8;
             apps = apps | ((int16_t) RxData_CAN1[0]);
 
@@ -269,13 +266,14 @@ void CAN1_RX0_IRQHandler(void) {
                 apps = 0;
             }
 
-            CAN_set_speed_command(&TxHeader, &TxData, apps);
+            CAN_TxHeaderTypeDef TxHeader;
+            uint8_t TxData[3];
+            CAN_set_speed_command(&TxHeader, TxData, apps);
 
             HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
             if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
                 Error_Handler();
             }
-            free(TxData);
 
             last_apps_timestamp = tim2_counter;
         } else if (RxHeader_CAN1.StdId == 0x0C) {
@@ -390,26 +388,24 @@ void CAN2_RX0_IRQHandler(void) {
 void emegrancy_stop(CAN_HandleTypeDef *hcan) {
     {
         CAN_TxHeaderTypeDef TxHeader;
-        uint8_t *TxData = NULL;
+        uint8_t TxData[3];
 
-        CAN_stop_speed_command(&TxHeader, &TxData);
+        CAN_stop_speed_command(&TxHeader, TxData);
 
         if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
             Error_Handler();
         }
-        free(TxData);
     }
 
     {
         CAN_TxHeaderTypeDef TxHeader;
-        uint8_t *TxData = NULL;
+        uint8_t TxData[3];
 
-        CAN_disable_controller_command(&TxHeader, &TxData);
+        CAN_disable_controller_command(&TxHeader, TxData);
 
         if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
             Error_Handler();
         }
-        free(TxData);
     }
     HAL_CAN_Stop(&hcan2);
 

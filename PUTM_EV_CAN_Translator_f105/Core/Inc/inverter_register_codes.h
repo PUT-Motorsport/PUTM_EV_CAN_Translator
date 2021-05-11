@@ -9,6 +9,7 @@
 #define INC_INVERTER_REGISTER_CODES_H_
 
 #define STATUS			0x40
+#define READ_COMMAND    0x3D
 
 #define SPEED_FILTER_ 	0x5E	// tested
 #define SPEED_ACTUAL 	0x30	// tested
