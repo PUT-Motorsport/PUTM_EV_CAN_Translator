@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
 #include "inverter_register_codes.h"
+#include <tractive_system_meta.h>
 
 /* USER CODE END Includes */
 
@@ -73,8 +74,6 @@ extern uint8_t RxData_CAN2[8];
 extern uint32_t TxMailbox1;
 extern uint32_t TxMailbox2;
 
-extern uint16_t engine_mode;
-
 extern uint16_t inverter_RPM;
 extern uint16_t inverter_RPM_to_send;
 extern uint16_t inverter_RMS;
@@ -95,6 +94,8 @@ extern uint16_t inverter_RPM_LIMIT;
 extern uint8_t send_inverter_data;
 extern uint8_t send_stop_limit;
 extern uint8_t send_stop_N_max;
+
+extern uint8_t TS_state;
 
 /* USER CODE END EV */
 
@@ -251,11 +252,11 @@ void CAN1_RX0_IRQHandler(void) {
                 //apps = -50;		// -5%
                 //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
 
-				//TODO
-				//add function to calculate reverse torque to slow car down
-				//test:
-				//	- use constant torque
-				//	- use function (linear or not)
+                //TODO
+                //add function to calculate reverse torque to slow car down
+                //test:
+                //	- use constant torque
+                //	- use function (linear or not)
 
             }
 
@@ -276,9 +277,18 @@ void CAN1_RX0_IRQHandler(void) {
             }
 
             last_apps_timestamp = tim2_counter;
-        } else if (RxHeader_CAN1.StdId == 0x0C) {
+        }
+        else if (RxHeader_CAN1.StdId == 0x0C) {
             if (RxData_CAN1[3] != 0x00) {
                 emegrancy_stop(&hcan2);
+            }
+        }
+        else if(RxHeader_CAN1.StdId == TS_MESS_ID){
+            if (RxData_CAN1[TS_MESS_BYTE] & (1 << TS_MESS_BIT)){
+                TS_state = 1;
+            }
+            else{
+                TS_state = 0;
             }
         }
     } else {

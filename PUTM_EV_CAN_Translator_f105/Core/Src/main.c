@@ -80,8 +80,6 @@ uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 1897
 uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
                                            11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
 
-uint16_t engine_mode;
-
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
 
 uint32_t tim2_counter;
@@ -93,6 +91,8 @@ uint8_t send_inverter_data;
 uint8_t inverter_stopped;
 uint8_t send_stop_limit;
 uint8_t send_stop_N_max;
+
+uint8_t TS_state = 0;
 
 /* USER CODE END PV */
 
@@ -154,8 +154,6 @@ int main(void) {
     /* USER CODE BEGIN 2 */
 
     HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
-
-    engine_mode = 100;
 
     inverter_RPM_to_send = 0;
     inverter_RPM_N_MAX = 0;
