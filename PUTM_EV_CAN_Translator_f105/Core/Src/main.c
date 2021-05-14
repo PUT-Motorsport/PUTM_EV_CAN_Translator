@@ -90,9 +90,12 @@ uint32_t apps_timeout_counter;
 uint32_t engine_timeout_counter;
 
 uint8_t send_inverter_data;
+uint8_t send_apps_data;
 uint8_t inverter_stopped;
 uint8_t send_stop_limit;
 uint8_t send_stop_N_max;
+
+uint16_t apps_to_send = 0;
 
 /* USER CODE END PV */
 
@@ -242,6 +245,34 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
+        if(send_apps_data >= 100){
+            send_apps_data = 0;
+
+            if (apps_to_send > 0) {
+                apps_to_send = ((apps_to_send * 10) / 10);
+            }
+            else if (apps_to_send == 0 && inverter_RPM_to_send > 0) {
+                apps_to_send = 0;
+                //apps = -10;		// -2.5%
+                //apps = -50;		// -5%
+                //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
+
+				//TODO
+				//add function to calculate reverse torque to slow car down
+				//test:
+				//	- use constant torque
+				//	- use function (linear or not)
+            }
+
+            CAN_TxHeaderTypeDef TxHeader;
+            uint8_t TxData[3];
+            CAN_set_speed_command(&TxHeader, TxData, apps_to_send);
+
+            HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
+            if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
+                Error_Handler();
+            }
+        }
         if (send_inverter_data && !inverter_stopped) {
             inverter_temp_IGBT = calculate_IGBT_temperature(inverter_temp_IGBT_raw);
             inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine_raw);
@@ -267,7 +298,8 @@ int main(void) {
                 Error_Handler();
             }
             send_inverter_data = 0;
-        } else if (send_stop_N_max && !inverter_stopped) {
+        }
+        else if (send_stop_N_max && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_N_max;
             uint8_t inverter_data_stop_max[3];
             uint32_t mail_data_inverter_stop_max = 0;
@@ -278,7 +310,8 @@ int main(void) {
                                  &mail_data_inverter_stop_max);
             while (HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_max));
 
-        } else if (send_stop_limit && !inverter_stopped) {
+        }
+        else if (send_stop_limit && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_limit;
             uint8_t inverter_data_stop_limit[3];
             uint32_t mail_data_inverter_stop_limit = 0;

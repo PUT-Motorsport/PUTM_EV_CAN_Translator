@@ -93,8 +93,11 @@ extern uint16_t inverter_RPM_N_MAX;
 extern uint16_t inverter_RPM_LIMIT;
 
 extern uint8_t send_inverter_data;
+extern uint8_t send_apps_data;
 extern uint8_t send_stop_limit;
 extern uint8_t send_stop_N_max;
+
+extern uint16_t apps_to_send;
 
 /* USER CODE END EV */
 
@@ -242,23 +245,6 @@ void CAN1_RX0_IRQHandler(void) {
             int16_t apps = ((int16_t) RxData_CAN1[1]) << 8;
             apps = apps | ((int16_t) RxData_CAN1[0]);
 
-            if (apps > 0) {
-                apps = ((apps * 10) / 10); // TOMASZ TUTAJ
-
-            } else if (apps == 0 && inverter_RPM_to_send > 0) {
-                apps = 0;            // 0%
-                //apps = -10;		// -2.5%
-                //apps = -50;		// -5%
-                //apps = -1 * (inverter_RPM_to_send * 10 / 0x7fff);
-
-				//TODO
-				//add function to calculate reverse torque to slow car down
-				//test:
-				//	- use constant torque
-				//	- use function (linear or not)
-
-            }
-
             if (apps > 500) {
                 emegrancy_stop(&hcan2);
                 HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
@@ -266,17 +252,11 @@ void CAN1_RX0_IRQHandler(void) {
                 apps = 0;
             }
 
-            CAN_TxHeaderTypeDef TxHeader;
-            uint8_t TxData[3];
-            CAN_set_speed_command(&TxHeader, TxData, apps);
-
-            HAL_CAN_AbortTxRequest(&hcan2, TxMailbox2);
-            if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox2) != HAL_OK) {
-                Error_Handler();
-            }
+            apps_to_send = apps;
 
             last_apps_timestamp = tim2_counter;
-        } else if (RxHeader_CAN1.StdId == 0x0C) {
+        }
+        else if (RxHeader_CAN1.StdId == 0x0C) {
             if (RxData_CAN1[3] != 0x00) {
                 emegrancy_stop(&hcan2);
             }
@@ -297,7 +277,7 @@ void CAN1_RX0_IRQHandler(void) {
 void TIM2_IRQHandler(void) {
     /* USER CODE BEGIN TIM2_IRQn 0 */
     ++tim2_counter;
-
+    ++send_apps_data;
     if (apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
         emegrancy_stop(&hcan2); //message to engine that apps is not responding
         HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
