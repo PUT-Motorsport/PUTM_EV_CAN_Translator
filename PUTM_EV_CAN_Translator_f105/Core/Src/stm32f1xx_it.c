@@ -74,6 +74,8 @@ extern uint8_t RxData_CAN2[8];
 extern uint32_t TxMailbox1;
 extern uint32_t TxMailbox2;
 
+extern uint16_t engine_mode;
+
 extern uint16_t inverter_RPM;
 extern uint16_t inverter_RPM_to_send;
 extern uint16_t inverter_RMS;
@@ -92,10 +94,12 @@ extern uint16_t inverter_RPM_N_MAX;
 extern uint16_t inverter_RPM_LIMIT;
 
 extern uint8_t send_inverter_data;
+extern uint8_t send_apps_data;
 extern uint8_t send_stop_limit;
 extern uint8_t send_stop_N_max;
 
 extern uint8_t TS_state;
+extern uint16_t apps_to_send;
 
 /* USER CODE END EV */
 
@@ -307,7 +311,7 @@ void CAN1_RX0_IRQHandler(void) {
 void TIM2_IRQHandler(void) {
     /* USER CODE BEGIN TIM2_IRQn 0 */
     ++tim2_counter;
-
+    ++send_apps_data;
     if (apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
         emegrancy_stop(&hcan2); //message to engine that apps is not responding
         HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
