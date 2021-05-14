@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
+#include <inverter_register_codes.h>
 
 /* USER CODE END Includes */
 
@@ -116,6 +117,8 @@ static void MX_TIM3_Init(void);
 
 static void CAN_requests_Init(void);
 
+static void my_init_CAN(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -170,51 +173,7 @@ int main(void) {
 
     send_inverter_data = 0;
 
-    sFilterConfig.FilterBank = 0;
-    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0A << 5;
-    sFilterConfig.FilterIdLow = 0x0000;
-    sFilterConfig.FilterMaskIdHigh = 0xFFFF << 5;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
-    sFilterConfig.SlaveStartFilterBank = 14;
-
-    sFilterConfig2.FilterBank = 15;
-    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig2.FilterIdHigh = 0x0000;
-    sFilterConfig2.FilterIdLow = 0x0000;
-    sFilterConfig2.FilterMaskIdHigh = 0x0;
-    sFilterConfig2.FilterMaskIdLow = 0x0;
-    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig2.FilterActivation = ENABLE;
-    sFilterConfig2.SlaveStartFilterBank = 14;
-
-    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_Start(&hcan1) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_Start(&hcan2) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) {
-        Error_Handler();
-    }
+    my_init_CAN();
 
     CAN_requests_Init();
 
@@ -245,7 +204,7 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        if(send_apps_data >= 100){
+        if(send_apps_data >= SEND_APPS_INTERVAL){
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
@@ -613,6 +572,53 @@ static void CAN_requests_Init(void) {
     HAL_Delay(10);
 }
 
+static void my_init_CAN(void){
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0A << 5;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0xFFFF << 5;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.SlaveStartFilterBank = 14;
+
+    sFilterConfig2.FilterBank = 15;
+    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig2.FilterIdHigh = 0x0000;
+    sFilterConfig2.FilterIdLow = 0x0000;
+    sFilterConfig2.FilterMaskIdHigh = 0x0;
+    sFilterConfig2.FilterMaskIdLow = 0x0;
+    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig2.FilterActivation = ENABLE;
+    sFilterConfig2.SlaveStartFilterBank = 14;
+
+    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_Start(&hcan1) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_Start(&hcan2) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) {
+        Error_Handler();
+    }
+}
 /* USER CODE END 4 */
 
 /**
