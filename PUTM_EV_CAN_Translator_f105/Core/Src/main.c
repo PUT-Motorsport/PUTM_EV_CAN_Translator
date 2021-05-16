@@ -202,7 +202,7 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        if(send_apps_data >= SEND_APPS_INTERVAL){
+        if(send_apps_data >= SEND_APPS_INTERVAL && TS_state){
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
