@@ -3,7 +3,6 @@
 
 uint16_t MAX_SPEED = 32767;
 
-extern uint16_t engine_mode;
 extern uint16_t inverter_igbt_temp_table[];
 extern uint16_t inverter_engine_temp_table[];
 
