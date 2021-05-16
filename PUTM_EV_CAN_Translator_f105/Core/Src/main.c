@@ -23,7 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_messeges_func.h"
-#include <inverter_register_codes.h>
+#include "inverter_register_codes.h"
+#include "common.h"
 
 /* USER CODE END Includes */
 
@@ -81,8 +82,6 @@ uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 1897
 uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
                                            11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
 
-uint16_t engine_mode;
-
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
 
 uint32_t tim2_counter;
@@ -97,6 +96,7 @@ uint8_t send_stop_limit;
 uint8_t send_stop_N_max;
 
 uint16_t apps_to_send = 0;
+uint8_t TS_state = 0;
 
 /* USER CODE END PV */
 
@@ -161,8 +161,6 @@ int main(void) {
 
     HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
 
-    engine_mode = 100;
-
     inverter_RPM_to_send = 0;
     inverter_RPM_N_MAX = 0;
     inverter_RPM_LIMIT = 0;
@@ -189,10 +187,10 @@ int main(void) {
 
     CAN_TxHeaderTypeDef tx_header_inverter_data;
     uint8_t inverter_data[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    tx_header_inverter_data.StdId = 0x0E;
+    tx_header_inverter_data.StdId = INVERTER_MESS_ID;
     tx_header_inverter_data.RTR = CAN_RTR_DATA;
     tx_header_inverter_data.IDE = CAN_ID_STD;
-    tx_header_inverter_data.DLC = 8;
+    tx_header_inverter_data.DLC = INVERTER_MESS_DLC;
     tx_header_inverter_data.TransmitGlobalTime = DISABLE;
     uint32_t mail_data_inverter = 0;
 
@@ -208,7 +206,7 @@ int main(void) {
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
-                apps_to_send = ((apps_to_send * 10) / 10);
+                apps_to_send = ((apps_to_send * TORQUE_MULTIPLIER) / TORQUE_DIVIDER);
             }
             else if (apps_to_send == 0 && inverter_RPM_to_send > 0) {
                 apps_to_send = 0;
@@ -268,7 +266,6 @@ int main(void) {
             HAL_CAN_AddTxMessage(&hcan2, &tx_header_inverter_stop_N_max, inverter_data_stop_max,
                                  &mail_data_inverter_stop_max);
             while (HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_max));
-
         }
         else if (send_stop_limit && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_limit;
@@ -284,12 +281,12 @@ int main(void) {
 
         if (inverter_stopped == 1) {
             CAN_TxHeaderTypeDef TxHeader_inverter_stopped;
-            uint8_t TxData[2] = {0x0A, 0x0A};
-            TxHeader_inverter_stopped.StdId = 0x07;
+            uint8_t TxData[2] = {INVERTER_ERROR_DATA, INVERTER_ERROR_DATA};
+            TxHeader_inverter_stopped.StdId = INVERTER_ERROR_ID;
             TxHeader_inverter_stopped.IDE = CAN_ID_STD;
             TxHeader_inverter_stopped.RTR = CAN_RTR_DATA;
             TxHeader_inverter_stopped.TransmitGlobalTime = DISABLE;
-            TxHeader_inverter_stopped.DLC = 2;
+            TxHeader_inverter_stopped.DLC = INVERTER_ERROR_DLC;
 
             HAL_CAN_AddTxMessage(&hcan1, &TxHeader_inverter_stopped, TxData, &TxMailbox1);
             HAL_Delay(10);
