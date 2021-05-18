@@ -114,6 +114,7 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 
 /* USER CODE BEGIN PFP */
+static void my_init(void);
 
 static void CAN_requests_Init(void);
 
@@ -159,28 +160,9 @@ int main(void) {
     MX_TIM3_Init();
     /* USER CODE BEGIN 2 */
 
-    HAL_Delay(500); // /Inverter needs some time to boot. If needed change to 700 ms or even 1000 ms.
+    HAL_Delay(500);
 
-    inverter_RPM_to_send = 0;
-    inverter_RPM_N_MAX = 0;
-    inverter_RPM_LIMIT = 0;
-
-    tim2_counter = 0;
-    apps_timeout_counter = 0;
-    engine_timeout_counter = 0;
-
-    send_inverter_data = 0;
-
-    my_init_CAN();
-
-    CAN_requests_Init();
-
-    HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, 1);
-    HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, 1);
-    HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 1);
-    HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 1);
-    HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 1);
-    HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 1);
+    my_init();
 
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim3);
@@ -541,6 +523,30 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
+static void my_init(void){
+    inverter_RPM_to_send = 0;
+    inverter_RPM_N_MAX = 0;
+    inverter_RPM_LIMIT = 0;
+
+    tim2_counter = 0;
+    apps_timeout_counter = 0;
+    engine_timeout_counter = 0;
+
+    send_inverter_data = 0;
+
+    my_init_CAN();
+
+    CAN_requests_Init();
+
+    HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, 1);
+    HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, 1);
+    HAL_GPIO_WritePin(GPIO_LED_3_GPIO_Port, GPIO_LED_3_Pin, 1);
+    HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 1);
+    HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 1);
+    HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 1);
+
+}
+
 static void CAN_requests_Init(void) {
     request_list_type requests[5] = {
             &CAN_request_speed_command,
