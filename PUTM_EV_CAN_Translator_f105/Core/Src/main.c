@@ -184,7 +184,7 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        if(send_apps_data >= SEND_APPS_INTERVAL && TS_state){
+        if(send_apps_data >= SEND_APPS_INTERVAL && TS_state && !inverter_stopped){
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
