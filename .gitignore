@@ -67,5 +67,5 @@ CMakeLists*
 
 *.zip
 
-hardware/fp-info-cache
-
+Hardware/fp-info-cache
+Hardware/PUTM_EV_CAN_Translator_Gerber
