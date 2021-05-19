@@ -98,6 +98,8 @@ extern uint8_t send_stop_N_max;
 
 extern uint8_t TS_state;
 extern uint16_t apps_to_send;
+extern uint8_t RTDS_enable = 0;
+extern uint16_t RTDS_counter = 0;
 
 /* USER CODE END EV */
 
@@ -261,9 +263,11 @@ void CAN1_RX0_IRQHandler(void) {
                 emegrancy_stop(&hcan2);
             }
         }
-        else if(RxHeader_CAN1.StdId == TS_MESS_ID){
+        else if (RxHeader_CAN1.StdId == TS_MESS_ID){
             if (RxData_CAN1[TS_MESS_BYTE] & (1 << TS_MESS_BIT)){
                 TS_state = 1;
+                RTDS_enable = 1;
+                RTDS_counter = 0;
             }
             else{
                 TS_state = 0;
@@ -286,6 +290,15 @@ void TIM2_IRQHandler(void) {
     /* USER CODE BEGIN TIM2_IRQn 0 */
     ++tim2_counter;
     ++send_apps_data;
+
+    if (RTDS_enable){
+        ++RTDS_counter;
+        if (RTDS_counter >= RTDS_DURATION_MS){
+            RTDS_counter = 0;
+            RTDS_enable = 0;
+        }
+    }
+
     if (apps_timeout_counter + MAX_TIMEOUT_TICKS <= tim2_counter) {
         emegrancy_stop(&hcan2); //message to engine that apps is not responding
         HAL_GPIO_WritePin(GPIO_LED_2_GPIO_Port, GPIO_LED_2_Pin, GPIO_PIN_RESET);
