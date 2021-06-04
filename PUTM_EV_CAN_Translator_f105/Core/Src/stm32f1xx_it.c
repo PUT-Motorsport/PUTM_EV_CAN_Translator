@@ -98,8 +98,8 @@ extern uint8_t send_stop_N_max;
 
 extern uint8_t TS_state;
 extern uint16_t apps_to_send;
-extern uint8_t RTDS_enable = 0;
-extern uint16_t RTDS_counter = 0;
+extern uint8_t RTDS_enable;
+extern uint16_t RTDS_counter;
 
 /* USER CODE END EV */
 
