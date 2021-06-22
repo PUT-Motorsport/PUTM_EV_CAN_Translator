@@ -97,6 +97,8 @@ uint8_t send_stop_N_max;
 
 uint16_t apps_to_send = 0;
 uint8_t TS_state = 0;
+uint8_t RTDS_enable = 0;
+uint16_t RTDS_counter = 0;
 
 /* USER CODE END PV */
 
@@ -184,7 +186,7 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        if(send_apps_data >= SEND_APPS_INTERVAL && TS_state && !inverter_stopped){
+        if (send_apps_data >= SEND_APPS_INTERVAL && TS_state && !inverter_stopped){
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
@@ -212,6 +214,7 @@ int main(void) {
                 Error_Handler();
             }
         }
+
         if (send_inverter_data && !inverter_stopped) {
             inverter_temp_IGBT = calculate_IGBT_temperature(inverter_temp_IGBT_raw);
             inverter_temp_engine = calculate_engine_temperature(inverter_temp_engine_raw);
@@ -238,7 +241,8 @@ int main(void) {
             }
             send_inverter_data = 0;
         }
-        else if (send_stop_N_max && !inverter_stopped) {
+
+        if (send_stop_N_max && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_N_max;
             uint8_t inverter_data_stop_max[3];
             uint32_t mail_data_inverter_stop_max = 0;
@@ -249,7 +253,8 @@ int main(void) {
                                  &mail_data_inverter_stop_max);
             while (HAL_CAN_IsTxMessagePending(&hcan2, mail_data_inverter_stop_max));
         }
-        else if (send_stop_limit && !inverter_stopped) {
+
+        if (send_stop_limit && !inverter_stopped) {
             CAN_TxHeaderTypeDef tx_header_inverter_stop_limit;
             uint8_t inverter_data_stop_limit[3];
             uint32_t mail_data_inverter_stop_limit = 0;
@@ -272,6 +277,14 @@ int main(void) {
 
             HAL_CAN_AddTxMessage(&hcan1, &TxHeader_inverter_stopped, TxData, &TxMailbox1);
             HAL_Delay(10);
+        }
+
+        if (RTDS_enable){
+            HAL_GPIO_WritePin(RTDS_GPIO_Port, RTDS_Pin, GPIO_PIN_SET);
+        }
+
+        if (!RTDS_enable){
+            HAL_GPIO_WritePin(RTDS_GPIO_Port, RTDS_Pin, GPIO_PIN_RESET);
         }
     }
     /* USER CODE END 3 */
@@ -481,15 +494,25 @@ static void MX_GPIO_Init(void) {
 
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
+
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(RTDS_GPIO_Port, RTDS_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(GPIOA, GPIO_LED_1_Pin | GPIO_LED_2_Pin | GPIO_LED_3_Pin, GPIO_PIN_SET);
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(GPIOC, GPIO_LED_4_Pin | GPIO_LED_5_Pin | GPIO_LED_6_Pin, GPIO_PIN_SET);
+
+    /*Configure GPIO pin : RTDS_Pin */
+    GPIO_InitStruct.Pin = RTDS_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(RTDS_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pins : GPIO_LED_1_Pin GPIO_LED_2_Pin GPIO_LED_3_Pin */
     GPIO_InitStruct.Pin = GPIO_LED_1_Pin | GPIO_LED_2_Pin | GPIO_LED_3_Pin;
@@ -523,7 +546,7 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-static void my_init(void){
+static void my_init(void) {
     inverter_RPM_to_send = 0;
     inverter_RPM_N_MAX = 0;
     inverter_RPM_LIMIT = 0;
@@ -575,7 +598,7 @@ static void CAN_requests_Init(void) {
     HAL_Delay(10);
 }
 
-static void my_init_CAN(void){
+static void my_init_CAN(void) {
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
