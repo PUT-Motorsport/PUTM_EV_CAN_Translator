@@ -77,11 +77,11 @@ uint16_t inverter_temp_air_raw;
 uint16_t inverter_RPM_N_MAX;
 uint16_t inverter_RPM_LIMIT;
 
-uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
+const uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
                                          19247, 19733, 20250, 20793, 21357, 21933, 22515, 23097,
                                          23671, 24232, 24775, 25296, 25792, 26261, 26702};
 
-uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
+const uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
                                            11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
 
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
@@ -240,9 +240,9 @@ int main(void) {
             inverter_data[6] = inverter_temp_engine;
             inverter_data[7] = inverter_temp_IGBT;
 
-//            if (HAL_CAN_AddTxMessage(&hcan1, &tx_header_inverter_data, inverter_data, &mail_data_inverter) != HAL_OK) {
-//                Error_Handler();
-//            }
+            if (HAL_CAN_AddTxMessage(&hcan1, &tx_header_inverter_data, inverter_data, &mail_data_inverter) != HAL_OK) {
+                Error_Handler();
+            }
             send_inverter_data = 0;
         }
 
