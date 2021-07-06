@@ -102,6 +102,9 @@ extern uint8_t RTDS_enable;
 extern uint16_t RTDS_counter;
 extern uint32_t RTDS_timestamp;
 
+// TODO add to cmake list -fsingle-precision-constan
+
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -241,6 +244,7 @@ void CAN1_RX0_IRQHandler(void) {
         if (RxHeader_CAN1.StdId == APPS_MESS_ID) {
             apps_timeout_counter = tim2_counter;
 
+            // TODO magic number
             if (last_apps_timestamp + 15 > tim2_counter) {
                 return;
             }
@@ -248,6 +252,7 @@ void CAN1_RX0_IRQHandler(void) {
             int16_t apps = ((int16_t) RxData_CAN1[1]) << 8;
             apps = apps | ((int16_t) RxData_CAN1[0]);
 
+            // TODO magic number
             if (apps > 500) {
                 emegrancy_stop(&hcan2);
                 HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 0);
@@ -344,45 +349,45 @@ void CAN2_RX0_IRQHandler(void) {
             uint8_t regid = RxData_CAN2[0];
 
             engine_timeout_counter = tim2_counter;
-            if (regid == SPEED_ACTUAL_) {
+            if (SPEED_ACTUAL_== regid) {
                 inverter_RPM = 0x0000;
                 inverter_RPM = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 inverter_RPM = inverter_RPM;
             }
-            else if (regid == I_IST_FILT) {
+            else if (I_IST_FILT == regid) {
                 inverter_RMS = 0x0000;
                 inverter_RMS = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RMS |= (uint16_t) (RxData_CAN2[1] & 0xFF);
             }
-            else if (regid == T_IGBT) {
+            else if (T_IGBT == regid) {
                 inverter_temp_IGBT_raw = 0x0000;
                 inverter_temp_IGBT_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_IGBT_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
             }
-            else if (regid == T_MOTOR) {
+            else if (T_MOTOR == regid) {
                 inverter_temp_engine_raw = 0x0000;
                 inverter_temp_engine_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_engine_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
             }
-            else if (regid == T_AIR) {
+            else if (T_AIR == regid) {
                 inverter_temp_air_raw = 0x0000;
                 inverter_temp_air_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_air_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
             }
-            else if (regid == MOTOR_RPMMAX) {
+            else if (MOTOR_RPMMAX == regid) {
                 inverter_RPM_N_MAX = 0x0000;
                 inverter_RPM_N_MAX = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM_N_MAX |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 send_stop_N_max = 1;
             }
-            else if (regid == SPEED_LIMIT) {
+            else if (SPEED_LIMIT == regid) {
                 inverter_RPM_LIMIT = 0x0000;
                 inverter_RPM_LIMIT = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM_LIMIT |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 send_stop_limit = 1;
             }
-            else if (regid == STATUS) {
+            else if (STATUS == regid) {
                 inverter_status = 0x0000;
                 inverter_status = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_status |= (uint16_t) (RxData_CAN2[1] & 0xFF);

@@ -103,6 +103,10 @@ uint8_t RTDS_enable = 0;
 uint16_t RTDS_counter = 0;
 uint32_t RTDS_timestamp = 0;
 
+
+// TODO add to cmake list -fsingle-precision-constan
+// TODO consider watchdog or iwatchdog
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -173,7 +177,7 @@ int main(void) {
     HAL_TIM_Base_Start_IT(&htim3);
 
     CAN_TxHeaderTypeDef tx_header_inverter_data;
-    uint8_t inverter_data[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t inverter_data[8] = {0};
     tx_header_inverter_data.StdId = INVERTER_MESS_ID;
     tx_header_inverter_data.RTR = CAN_RTR_DATA;
     tx_header_inverter_data.IDE = CAN_ID_STD;
@@ -586,6 +590,9 @@ static void CAN_requests_Init(void) {
 
     for (int i = 0; i < 5; ++i) {
         CAN_TxHeaderTypeDef TxHeader;
+        // TODO
+        // why not local array?
+        // uint8_t TXData[60] = {0};
         uint8_t *TxData = NULL;
 
         requests[i](&TxHeader, &TxData);
@@ -597,6 +604,8 @@ static void CAN_requests_Init(void) {
         while (HAL_CAN_IsTxMessagePending(&hcan2, TxMailbox2));
 
         HAL_Delay(3);
+
+
         free(TxData);
     }
 
