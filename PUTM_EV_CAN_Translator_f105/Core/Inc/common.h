@@ -7,7 +7,7 @@
 
 #define MAX_TIMEOUT_TICKS   100
 
-#define TS_MESS_ID          0x00
+#define TS_MESS_ID          0x0D
 #define TS_MESS_BYTE        0x00
 #define TS_MESS_BIT         0x00
 
@@ -26,6 +26,7 @@
 #define TORQUE_DIVIDER      10
 #define TORQUE_MULTIPLIER   10
 
-#define RTDS_DURATION_MS    500
+#define RTDS_DURATION_MS    1010
+#define RTDS_INTERVAL_CHG   500
 
 #endif //PUTM_EV_CAN_TRANSLATOR_F105_COMMON_H

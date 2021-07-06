@@ -100,6 +100,7 @@ extern uint8_t TS_state;
 extern uint16_t apps_to_send;
 extern uint8_t RTDS_enable;
 extern uint16_t RTDS_counter;
+extern uint32_t RTDS_timestamp;
 
 /* USER CODE END EV */
 
@@ -263,17 +264,18 @@ void CAN1_RX0_IRQHandler(void) {
                 emegrancy_stop(&hcan2);
             }
         }
-        else if (RxHeader_CAN1.StdId == TS_MESS_ID){
-            if (RxData_CAN1[TS_MESS_BYTE] & (1 << TS_MESS_BIT)){
-                TS_state = 1;
-                RTDS_enable = 1;
-                RTDS_counter = 0;
-            }
-            else{
-                TS_state = 0;
+        else if (RxHeader_CAN1.StdId == TS_MESS_ID) {
+            if (RxData_CAN1[TS_MESS_BYTE] == (1 << TS_MESS_BIT) && RTDS_timestamp + RTDS_INTERVAL_CHG < tim2_counter) {
+                RTDS_timestamp = tim2_counter;
+                TS_state ^= 1;
+                if (TS_state){
+                    RTDS_enable = 1;
+                    RTDS_counter = 0;
+                }
             }
         }
-    } else {
+    }
+    else {
         Error_Handler();
     }
     /* USER CODE END CAN1_RX0_IRQn 0 */
@@ -291,9 +293,9 @@ void TIM2_IRQHandler(void) {
     ++tim2_counter;
     ++send_apps_data;
 
-    if (RTDS_enable){
+    if (RTDS_enable) {
         ++RTDS_counter;
-        if (RTDS_counter >= RTDS_DURATION_MS){
+        if (RTDS_counter >= RTDS_DURATION_MS) {
             RTDS_counter = 0;
             RTDS_enable = 0;
         }
@@ -347,39 +349,47 @@ void CAN2_RX0_IRQHandler(void) {
                 inverter_RPM = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 inverter_RPM = inverter_RPM;
-            } else if (regid == I_IST_FILT) {
+            }
+            else if (regid == I_IST_FILT) {
                 inverter_RMS = 0x0000;
                 inverter_RMS = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RMS |= (uint16_t) (RxData_CAN2[1] & 0xFF);
-            } else if (regid == T_IGBT) {
+            }
+            else if (regid == T_IGBT) {
                 inverter_temp_IGBT_raw = 0x0000;
                 inverter_temp_IGBT_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_IGBT_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
-            } else if (regid == T_MOTOR) {
+            }
+            else if (regid == T_MOTOR) {
                 inverter_temp_engine_raw = 0x0000;
                 inverter_temp_engine_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_engine_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
-            } else if (regid == T_AIR) {
+            }
+            else if (regid == T_AIR) {
                 inverter_temp_air_raw = 0x0000;
                 inverter_temp_air_raw = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_temp_air_raw |= (uint16_t) (RxData_CAN2[1] & 0xFF);
-            } else if (regid == MOTOR_RPMMAX) {
+            }
+            else if (regid == MOTOR_RPMMAX) {
                 inverter_RPM_N_MAX = 0x0000;
                 inverter_RPM_N_MAX = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM_N_MAX |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 send_stop_N_max = 1;
-            } else if (regid == SPEED_LIMIT) {
+            }
+            else if (regid == SPEED_LIMIT) {
                 inverter_RPM_LIMIT = 0x0000;
                 inverter_RPM_LIMIT = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_RPM_LIMIT |= (uint16_t) (RxData_CAN2[1] & 0xFF);
                 send_stop_limit = 1;
-            } else if (regid == STATUS) {
+            }
+            else if (regid == STATUS) {
                 inverter_status = 0x0000;
                 inverter_status = (uint16_t) (RxData_CAN2[2] << 8);
                 inverter_status |= (uint16_t) (RxData_CAN2[1] & 0xFF);
             }
         }
-    } else {
+    }
+    else {
         Error_Handler();
     }
     /* USER CODE END CAN2_RX0_IRQn 1 */
