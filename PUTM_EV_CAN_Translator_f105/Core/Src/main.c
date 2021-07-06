@@ -52,6 +52,8 @@ TIM_HandleTypeDef htim3;
 /* USER CODE BEGIN PV */
 CAN_FilterTypeDef sFilterConfig;
 CAN_FilterTypeDef sFilterConfig2;
+CAN_FilterTypeDef sFilterConfig3;
+CAN_FilterTypeDef sFilterConfig4;
 
 CAN_RxHeaderTypeDef RxHeader_CAN1;
 CAN_RxHeaderTypeDef RxHeader_CAN2;
@@ -75,11 +77,11 @@ uint16_t inverter_temp_air_raw;
 uint16_t inverter_RPM_N_MAX;
 uint16_t inverter_RPM_LIMIT;
 
-uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
+const uint16_t inverter_igbt_temp_table[21] = {17151, 17400, 17688, 18017, 18387, 18979,
                                          19247, 19733, 20250, 20793, 21357, 21933, 22515, 23097,
                                          23671, 24232, 24775, 25296, 25792, 26261, 26702};
 
-uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
+const uint16_t inverter_engine_temp_table[15] = {8438, 8971, 9510, 10052, 10592, 11128,
                                            11662, 12192, 12714, 13228, 13735, 14228, 14685, 15082, 15397};
 
 typedef void (*request_list_type)(CAN_TxHeaderTypeDef *, uint8_t **);
@@ -99,6 +101,7 @@ uint16_t apps_to_send = 0;
 uint8_t TS_state = 0;
 uint8_t RTDS_enable = 0;
 uint16_t RTDS_counter = 0;
+uint32_t RTDS_timestamp = 0;
 
 /* USER CODE END PV */
 
@@ -186,7 +189,7 @@ int main(void) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        if (send_apps_data >= SEND_APPS_INTERVAL && TS_state && !inverter_stopped){
+        if (send_apps_data >= SEND_APPS_INTERVAL && TS_state && !inverter_stopped) {
             send_apps_data = 0;
 
             if (apps_to_send > 0) {
@@ -223,7 +226,8 @@ int main(void) {
 
             if (inverter_RPM_LIMIT == 0 && inverter_RPM_N_MAX == 0) {
                 inverter_RPM_to_send = 0x7FFF;
-            } else {
+            }
+            else {
                 inverter_RPM_to_send = (uint16_t) ((float) inverter_RPM / 32767.0f * (float) inverter_RPM_N_MAX);
             }
 
@@ -279,12 +283,14 @@ int main(void) {
             HAL_Delay(10);
         }
 
-        if (RTDS_enable){
+        if (RTDS_enable) {
             HAL_GPIO_WritePin(RTDS_GPIO_Port, RTDS_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, GPIO_PIN_RESET);
         }
 
-        if (!RTDS_enable){
+        if (!RTDS_enable) {
             HAL_GPIO_WritePin(RTDS_GPIO_Port, RTDS_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIO_LED_1_GPIO_Port, GPIO_LED_1_Pin, GPIO_PIN_SET);
         }
     }
     /* USER CODE END 3 */
@@ -311,7 +317,7 @@ void SystemClock_Config(void) {
     RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
     RCC_OscInitStruct.PLL2.PLL2State = RCC_PLL2_ON;
     RCC_OscInitStruct.PLL2.PLL2MUL = RCC_PLL2_MUL10;
-    RCC_OscInitStruct.PLL2.HSEPrediv2Value = RCC_HSE_PREDIV2_DIV4;
+    RCC_OscInitStruct.PLL2.HSEPrediv2Value = RCC_HSE_PREDIV2_DIV2;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         Error_Handler();
     }
@@ -567,7 +573,6 @@ static void my_init(void) {
     HAL_GPIO_WritePin(GPIO_LED_4_GPIO_Port, GPIO_LED_4_Pin, 1);
     HAL_GPIO_WritePin(GPIO_LED_5_GPIO_Port, GPIO_LED_5_Pin, 1);
     HAL_GPIO_WritePin(GPIO_LED_6_GPIO_Port, GPIO_LED_6_Pin, 1);
-
 }
 
 static void CAN_requests_Init(void) {
@@ -602,7 +607,7 @@ static void my_init_CAN(void) {
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0A << 5;
+    sFilterConfig.FilterIdHigh = APPS_MESS_ID << 5;
     sFilterConfig.FilterIdLow = 0x0000;
     sFilterConfig.FilterMaskIdHigh = 0xFFFF << 5;
     sFilterConfig.FilterMaskIdLow = 0x0000;
@@ -621,7 +626,38 @@ static void my_init_CAN(void) {
     sFilterConfig2.FilterActivation = ENABLE;
     sFilterConfig2.SlaveStartFilterBank = 14;
 
+    sFilterConfig3.FilterBank = 0;
+    sFilterConfig3.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig3.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig3.FilterIdHigh = TS_MESS_ID << 5;
+    sFilterConfig3.FilterIdLow = 0x0000;
+    sFilterConfig3.FilterMaskIdHigh = 0xFFFF << 5;
+    sFilterConfig3.FilterMaskIdLow = 0x0000;
+    sFilterConfig3.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig3.FilterActivation = ENABLE;
+    sFilterConfig3.SlaveStartFilterBank = 14;
+
+    sFilterConfig4.FilterBank = 0;
+    sFilterConfig4.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig4.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig4.FilterIdHigh = BMS_HV_MESS_ID << 5;
+    sFilterConfig4.FilterIdLow = 0x0000;
+    sFilterConfig4.FilterMaskIdHigh = 0xFFFF << 5;
+    sFilterConfig4.FilterMaskIdLow = 0x0000;
+    sFilterConfig4.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig4.FilterActivation = ENABLE;
+    sFilterConfig4.SlaveStartFilterBank = 14;
+
+
     if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig3) != HAL_OK) {
+        Error_Handler();
+    }
+
+    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig4) != HAL_OK) {
         Error_Handler();
     }
 
