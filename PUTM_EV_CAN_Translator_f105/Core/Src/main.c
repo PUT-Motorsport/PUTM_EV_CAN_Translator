@@ -51,9 +51,6 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 CAN_FilterTypeDef sFilterConfig;
-CAN_FilterTypeDef sFilterConfig2;
-CAN_FilterTypeDef sFilterConfig3;
-CAN_FilterTypeDef sFilterConfig4;
 
 CAN_RxHeaderTypeDef RxHeader_CAN1;
 CAN_RxHeaderTypeDef RxHeader_CAN2;
@@ -604,64 +601,24 @@ static void CAN_requests_Init(void) {
 }
 
 static void my_init_CAN(void) {
-    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterBank = 15;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = APPS_MESS_ID << 5;
+    sFilterConfig.FilterIdHigh = 0x0000;
     sFilterConfig.FilterIdLow = 0x0000;
-    sFilterConfig.FilterMaskIdHigh = 0xFFFF << 5;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0;
+    sFilterConfig.FilterMaskIdLow = 0x0;
     sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
     sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.SlaveStartFilterBank = 14;
 
-    sFilterConfig2.FilterBank = 15;
-    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig2.FilterIdHigh = 0x0000;
-    sFilterConfig2.FilterIdLow = 0x0000;
-    sFilterConfig2.FilterMaskIdHigh = 0x0;
-    sFilterConfig2.FilterMaskIdLow = 0x0;
-    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig2.FilterActivation = ENABLE;
-    sFilterConfig2.SlaveStartFilterBank = 14;
-
-    sFilterConfig3.FilterBank = 0;
-    sFilterConfig3.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig3.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig3.FilterIdHigh = TS_MESS_ID << 5;
-    sFilterConfig3.FilterIdLow = 0x0000;
-    sFilterConfig3.FilterMaskIdHigh = 0xFFFF << 5;
-    sFilterConfig3.FilterMaskIdLow = 0x0000;
-    sFilterConfig3.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig3.FilterActivation = ENABLE;
-    sFilterConfig3.SlaveStartFilterBank = 14;
-
-    sFilterConfig4.FilterBank = 0;
-    sFilterConfig4.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig4.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig4.FilterIdHigh = BMS_HV_MESS_ID << 5;
-    sFilterConfig4.FilterIdLow = 0x0000;
-    sFilterConfig4.FilterMaskIdHigh = 0xFFFF << 5;
-    sFilterConfig4.FilterMaskIdLow = 0x0000;
-    sFilterConfig4.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig4.FilterActivation = ENABLE;
-    sFilterConfig4.SlaveStartFilterBank = 14;
 
 
     if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK) {
         Error_Handler();
     }
 
-    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig3) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig4) != HAL_OK) {
-        Error_Handler();
-    }
-
-    if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK) {
+    if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig) != HAL_OK) {
         Error_Handler();
     }
 
